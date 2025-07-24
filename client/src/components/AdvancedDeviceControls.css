@@ -1,0 +1,183 @@
+.advanced-device-controls {
+  background: white;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.control-sections {
+  margin-bottom: 2rem;
+}
+
+.control-group {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.control-group select,
+.control-group input[type="range"],
+.control-group input[type="color"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+}
+
+.control-group select {
+  padding: 0.5rem;
+}
+
+.control-group input[type="range"] {
+  height: 8px;
+  -webkit-appearance: none;
+  background: #ddd;
+  border-radius: 4px;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #2196f3;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.automation-section {
+  margin-bottom: 2rem;
+}
+
+.scene-list,
+.automation-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.scene-list button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  background: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.scene-list button:hover {
+  background: #e0e0e0;
+}
+
+.scene-list button.active {
+  background: #2196f3;
+  color: white;
+}
+
+.automation-rule {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 5px;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.automation-rule button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  background: #2196f3;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.automation-rule button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.status-section {
+  margin-top: 2rem;
+}
+
+.status-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.status-item {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-badge.online {
+  background: #4caf50;
+  color: white;
+}
+
+.status-badge.offline {
+  background: #f44336;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .advanced-device-controls {
+    padding: 1rem;
+  }
+
+  .control-group {
+    padding: 0.75rem;
+  }
+
+  .scene-list,
+  .automation-list {
+    gap: 0.5rem;
+  }
+
+  .scene-list button {
+    padding: 0.5rem 1rem;
+  }
+
+  .status-items {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Error states */
+.error {
+  border: 2px solid #f44336;
+}

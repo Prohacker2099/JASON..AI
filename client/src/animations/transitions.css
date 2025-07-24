@@ -1,0 +1,271 @@
+/* JASON Home Animations and Transitions */
+
+/* Base Transitions */
+.jason-transition {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jason-transition-fast {
+  transition-duration: 150ms;
+}
+
+.jason-transition-normal {
+  transition-duration: 250ms;
+}
+
+.jason-transition-slow {
+  transition-duration: 350ms;
+}
+
+/* Fade Animations */
+@keyframes jasonFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes jasonFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.jason-fade-in {
+  animation: jasonFadeIn 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jason-fade-out {
+  animation: jasonFadeOut 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scale Animations */
+@keyframes jasonScaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes jasonScaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+.jason-scale-in {
+  animation: jasonScaleIn 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jason-scale-out {
+  animation: jasonScaleOut 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slide Animations */
+@keyframes jasonSlideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes jasonSlideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.jason-slide-in-right {
+  animation: jasonSlideInRight 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jason-slide-out-right {
+  animation: jasonSlideOutRight 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Logo Animation */
+@keyframes jasonLogoPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+    filter: brightness(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+.jason-logo-pulse {
+  animation: jasonLogoPulse 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Circuit Pattern Animation */
+@keyframes jasonCircuitFlow {
+  0% {
+    opacity: 0.4;
+    background-position: 0% 0%;
+  }
+  50% {
+    opacity: 0.6;
+    background-position: 100% 100%;
+  }
+  100% {
+    opacity: 0.4;
+    background-position: 0% 0%;
+  }
+}
+
+.jason-circuit-pattern {
+  background-image: linear-gradient(
+    45deg,
+    var(--jason-electric) 10%,
+    transparent 10%,
+    transparent 20%,
+    var(--jason-electric) 20%,
+    var(--jason-electric) 30%,
+    transparent 30%
+  );
+  background-size: 200% 200%;
+  animation: jasonCircuitFlow 10s infinite linear;
+}
+
+/* AI Thinking Animation */
+@keyframes jasonThinking {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+}
+
+.jason-thinking {
+  animation: jasonThinking 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Device Control Animations */
+@keyframes jasonPowerOn {
+  0% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(0, 163, 255, 0.4);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 15px rgba(0, 163, 255, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 163, 255, 0);
+  }
+}
+
+.jason-power-on {
+  animation: jasonPowerOn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Voice Input Wave Animation */
+@keyframes jasonVoiceWave {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.jason-voice-wave::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border: 2px solid var(--jason-electric);
+  border-radius: 50%;
+  animation: jasonVoiceWave 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading States */
+@keyframes jasonLoadingPulse {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+}
+
+.jason-loading {
+  animation: jasonLoadingPulse 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card Hover Effect */
+.jason-card-hover {
+  transition:
+    transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jason-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -2px rgba(0, 163, 255, 0.15);
+}
+
+/* Button Click Animation */
+@keyframes jasonButtonClick {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.jason-button-click {
+  animation: jasonButtonClick 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}

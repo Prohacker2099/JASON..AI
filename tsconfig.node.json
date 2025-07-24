@@ -1,0 +1,32 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2020",
+    "sourceMap": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true, // Changed to true to resolve error with allowImportingTsExtensions
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strict": false,
+    "noEmitOnError": false,
+    "allowImportingTsExtensions": true // Added to allow .ts extensions in imports
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": [
+    "server/**/*",
+    "db/**/*",
+    "integrations/**/*",
+    "plugins/**/*",
+    "shared/**/*"
+  ],
+  "exclude": ["db/migrations/Untitled-1.ts", "node_modules", "dist"]
+}

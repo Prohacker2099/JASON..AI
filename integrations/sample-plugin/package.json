@@ -1,0 +1,29 @@
+{
+  "name": "jason-sample-plugin",
+  "version": "1.0.0",
+  "description": "Sample plugin for JASON smart home platform",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "jason",
+    "plugin",
+    "smart-home"
+  ],
+  "author": "JASON Team",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.0",
+    "@types/uuid": "^9.0.1",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "jason-ai-architect": "^1.0.0"
+  }
+}

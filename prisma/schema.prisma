@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  name       String?
+  devices    Device[]
+  automations Automation[]
+  scenes     Scene[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Device {
+  id           String   @id
+  name         String
+  type         String
+  protocol     String
+  capabilities String[]
+  location     String?
+  state        Json     @default("{}")
+  metadata     Json?
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  history      DeviceHistory[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model DeviceHistory {
+  id        String   @id @default(uuid())
+  device    Device   @relation(fields: [deviceId], references: [id])
+  deviceId  String
+  state     Json
+  timestamp DateTime @default(now())
+}
+
+model Automation {
+  id          String   @id @default(uuid())
+  name        String
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  triggers    Json
+  conditions  Json?
+  actions     Json
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Scene {
+  id        String   @id @default(uuid())
+  name      String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  actions   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

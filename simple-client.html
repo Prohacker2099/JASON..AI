@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Simple JASON Client</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      #status {
+        padding: 10px;
+        margin: 10px 0;
+      }
+      .connected {
+        background-color: #d4edda;
+      }
+      .disconnected {
+        background-color: #f8d7da;
+      }
+      #devices {
+        margin-top: 20px;
+      }
+      .device {
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      button {
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Simple JASON Client</h1>
+
+    <div id="status" class="disconnected">Disconnected</div>
+
+    <button id="connect">Connect</button>
+    <button id="discover">Discover Devices</button>
+
+    <h2>Devices</h2>
+    <div id="devices">No devices found</div>
+
+    <h2>Log</h2>
+    <pre id="log"></pre>
+
+    <script>
+      // Elements
+      const statusEl = document.getElementById("status");
+      const devicesEl = document.getElementById("devices");
+      const logEl = document.getElementById("log");
+      const connectBtn = document.getElementById("connect");
+      const discoverBtn = document.getElementById("discover");
+
+      // WebSocket
+      let ws = null;
+
+      // Log function
+      function log(message) {
+        const timestamp = new Date().toLocaleTimeString();
+        logEl.textContent += `[${timestamp}] ${message}\n`;
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      // Connect to WebSocket
+      function connect() {
+        log("Connecting to WebSocket server...");
+
+        // Try both ports
+        const ports = [8990, 8992];
+        let connected = false;
+
+        for (const port of ports) {
+          try {
+            ws = new WebSocket(`ws://localhost:${port}`);
+
+            ws.onopen = function () {
+              connected = true;
+              statusEl.textContent = `Connected to port ${port}`;
+              statusEl.className = "connected";
+              log(`Connected to WebSocket server on port ${port}`);
+              discoverDevices();
+            };
+
+            ws.onmessage = function (event) {
+              try {
+                const message = JSON.parse(event.data);
+                log(`Received message: ${message.type}`);
+
+                if (message.type === "deviceList") {
+                  renderDevices(message.devices || []);
+                }
+              } catch (error) {
+                log(`Error parsing message: ${error.message}`);
+              }
+            };
+
+            ws.onerror = function (error) {
+              log(
+                `WebSocket error on port ${port}: ${error.message || "Unknown error"}`,
+              );
+              if (!connected) {
+                tryNextPort();
+              }
+            };
+
+            ws.onclose = function () {
+              statusEl.textContent = "Disconnected";
+              statusEl.className = "disconnected";
+              log("WebSocket connection closed");
+            };
+
+            break;
+          } catch (error) {
+            log(`Error connecting to port ${port}: ${error.message}`);
+          }
+        }
+      }
+
+      // Discover devices
+      function discoverDevices() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          log("Sending device discovery request...");
+          ws.send(JSON.stringify({ type: "startDiscovery" }));
+        } else {
+          log("WebSocket not connected");
+        }
+      }
+
+      // Render devices
+      function renderDevices(devices) {
+        log(`Found ${devices.length} devices`);
+
+        if (devices.length === 0) {
+          devicesEl.innerHTML = "No devices found";
+          return;
+        }
+
+        devicesEl.innerHTML = "";
+
+        devices.forEach((device) => {
+          const deviceEl = document.createElement("div");
+          deviceEl.className = "device";
+
+          const isPowered = device.state && device.state.power;
+
+          deviceEl.innerHTML = `
+                    <h3>${device.name}</h3>
+                    <p>Type: ${device.type}</p>
+                    <p>ID: ${device.id}</p>
+                    <p>Address: ${device.address || device.ipAddress}</p>
+                    <p>Status: ${isPowered ? "ON" : "OFF"}</p>
+                    <button class="toggle" data-id="${device.id}" data-state="${isPowered}">
+                        Turn ${isPowered ? "OFF" : "ON"}
+                    </button>
+                `;
+
+          devicesEl.appendChild(deviceEl);
+
+          // Add event listener
+          const toggleBtn = deviceEl.querySelector(".toggle");
+          toggleBtn.addEventListener("click", function () {
+            const deviceId = this.getAttribute("data-id");
+            const currentState = this.getAttribute("data-state") === "true";
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              log(`Controlling device ${deviceId}: power ${!currentState}`);
+
+              ws.send(
+                JSON.stringify({
+                  type: "controlDevice",
+                  deviceId: deviceId,
+                  command: "power",
+                  params: { state: !currentState },
+                  requestId: Date.now().toString(),
+                }),
+              );
+            } else {
+              log("WebSocket not connected");
+            }
+          });
+        });
+      }
+
+      // Event listeners
+      connectBtn.addEventListener("click", connect);
+      discoverBtn.addEventListener("click", discoverDevices);
+
+      // Auto-connect
+      connect();
+    </script>
+  </body>
+</html>

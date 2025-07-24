@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "skipLibCheck": true,
+    "noEmitOnError": false,
+    "strict": false,
+    "noImplicitAny": false,
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist"
+  },
+  "files": [
+    "server/app.ts",
+    "server/routes.ts"
+  ],
+  "compilerOptions": {
+    "moduleResolution": "NodeNext"
+  }
+}
