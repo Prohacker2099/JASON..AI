@@ -14,65 +14,8 @@ import moment from "moment";
 
 const execAsync = promisify(exec);
 
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-// Create Express app
-const app = express();
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
-const PORT = 10000;
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, "uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-
-const upload = multer({ storage });
-
-// Middleware
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "client")));
-
-// Fix MIME type issues
-app.use((req, res, next) => {
-  if (req.path.endsWith(".js")) {
-    res.setHeader("Content-Type", "application/javascript");
-  } else if (req.path.endsWith(".css")) {
-    res.setHeader("Content-Type", "text/css");
-  }
-  next();
-});
-
-// Store discovered devices and user data
-let discoveredDevices = [];
-let networkDevices = [];
-let userSchedule = [];
-let userPreferences = {
-  name: "User",
-  wakeUpTime: "07:00",
-  sleepTime: "23:00",
-  favoriteMusic: "Relaxing",
-  weatherAlerts: true,
-  trafficAlerts: true,
-  darkMode: true,
-  accent: "#0B84D0",
-  notifications: true,
-};
-let conversationHistory = [];
-
-// Mock device data
-const mockDevices = [
+const  = [
   {
     deviceId: "light-living-room",
     name: "Living Room Light",
@@ -187,319 +130,10 @@ const mockDevices = [
   },
 ];
 
-// Discover real network devices
-async function discoverNetworkDevices() {
-  try {
-    // Get local network interfaces
-    const interfaces = networkInterfaces();
-    const networkAddresses = [];
 
-    // Extract IPv4 addresses
-    Object.values(interfaces).forEach((iface) => {
-      if (iface) {
-        iface.forEach((addr) => {
-          if (addr.family === "IPv4" && !addr.internal) {
-            const parts = addr.address.split(".");
-            const prefix = `${parts[0]}.${parts[1]}.${parts[2]}`;
-            networkAddresses.push({ prefix, address: addr.address });
-          }
-        });
-      }
-    });
-
-    console.log("Network addresses:", networkAddresses);
-
-    // Scan each network
-    for (const network of networkAddresses) {
-      try {
-        // Use ping to find active devices
-        const command =
-          process.platform === "win32"
-            ? `for /L %i in (1,1,10) do @ping -n 1 -w 100 ${network.prefix}.%i | find "Reply"`
-            : `for i in {1..10}; do ping -c 1 -W 1 ${network.prefix}.$i | grep "64 bytes" | cut -d" " -f4 | tr -d ":"; done`;
-
-        const { stdout } = await execAsync(command);
-        const ips = stdout.split("\n").filter(Boolean);
-
-        console.log(
-          `Found ${ips.length} devices on network ${network.prefix}.0/24`,
-        );
-
-        // Add discovered devices
-        for (const ip of ips) {
-          const cleanIp = ip.trim();
-          if (cleanIp && !networkDevices.some((d) => d.ip === cleanIp)) {
-            networkDevices.push({
-              ip: cleanIp,
-              name: `Device at ${cleanIp}`,
-              type: "unknown",
-              lastSeen: new Date().toISOString(),
-            });
-          }
-        }
-      } catch (err) {
-        console.error(`Error scanning network ${network.prefix}.0/24:`, err);
-      }
-    }
-
-    // Convert network devices to app format
-    discoveredDevices = networkDevices.map((device, index) => ({
-      deviceId: `network-${index}`,
-      name: device.name,
-      type: "network",
-      status: "Online",
-      isActive: true,
-      details: {
-        ip: device.ip,
-        lastSeen: device.lastSeen,
-      },
-    }));
-
-    console.log(`Discovered ${discoveredDevices.length} network devices`);
-    return discoveredDevices;
-  } catch (error) {
-    console.error("Error discovering network devices:", error);
-    return [];
-  }
-}
-
-// Process schedule file
-async function processScheduleFile(filePath) {
-  const fileExt = path.extname(filePath).toLowerCase();
-
-  try {
-    if (fileExt === ".csv") {
-      return await processCSVSchedule(filePath);
-    } else if (fileExt === ".ics") {
-      return await processICSSchedule(filePath);
-    } else if (fileExt === ".json") {
-      return await processJSONSchedule(filePath);
-    } else {
-      throw new Error("Unsupported file format");
-    }
-  } catch (error) {
-    console.error("Error processing schedule file:", error);
-    throw error;
-  }
-}
-
-// Process CSV schedule
-function processCSVSchedule(filePath) {
-  return new Promise((resolve, reject) => {
-    const events = [];
-
-    parseFile(filePath, { headers: true })
-      .on("error", (error) => reject(error))
-      .on("data", (row) => {
-        events.push({
-          title: row.title || row.subject || row.name || "Untitled Event",
-          start: row.start || row.startTime || row.startDate || row.date,
-          end: row.end || row.endTime || row.endDate || "",
-          location: row.location || "",
-          description: row.description || row.notes || "",
-        });
-      })
-      .on("end", () => resolve(events));
-  });
-}
-
-// Process ICS schedule
-async function processICSSchedule(filePath) {
-  const events = [];
-  const icsEvents = await ical.parseFile(filePath);
-
-  Object.values(icsEvents).forEach((event) => {
-    if (event.type === "VEVENT") {
-      events.push({
-        title: event.summary || "Untitled Event",
-        start: event.start ? moment(event.start).format() : "",
-        end: event.end ? moment(event.end).format() : "",
-        location: event.location || "",
-        description: event.description || "",
-      });
-    }
-  });
-
-  return events;
-}
-
-// Process JSON schedule
-async function processJSONSchedule(filePath) {
-  const data = await fs.promises.readFile(filePath, "utf8");
-  const jsonData = JSON.parse(data);
-
-  // Handle different JSON formats
-  if (Array.isArray(jsonData)) {
-    return jsonData.map((event) => ({
-      title: event.title || event.subject || event.name || "Untitled Event",
-      start: event.start || event.startTime || event.startDate || event.date,
-      end: event.end || event.endTime || event.endDate || "",
-      location: event.location || "",
-      description: event.description || event.notes || "",
-    }));
-  } else if (jsonData.events && Array.isArray(jsonData.events)) {
-    return jsonData.events.map((event) => ({
-      title: event.title || event.subject || event.name || "Untitled Event",
-      start: event.start || event.startTime || event.startDate || event.date,
-      end: event.end || event.endTime || event.endDate || "",
-      location: event.location || "",
-      description: event.description || event.notes || "",
-    }));
-  } else {
-    throw new Error("Invalid JSON format");
-  }
-}
-
-// Get upcoming events
-function getUpcomingEvents() {
-  const now = moment();
-
-  return userSchedule
-    .filter((event) => {
-      const eventStart = moment(event.start);
-      return eventStart.isValid() && eventStart.isAfter(now);
-    })
-    .sort((a, b) => moment(a.start).diff(moment(b.start)))
-    .slice(0, 5);
-}
-
-// Get today's events
-function getTodayEvents() {
-  const now = moment();
-  const startOfDay = moment().startOf("day");
-  const endOfDay = moment().endOf("day");
-
-  return userSchedule
-    .filter((event) => {
-      const eventStart = moment(event.start);
-      return (
-        eventStart.isValid() &&
-        eventStart.isSameOrAfter(startOfDay) &&
-        eventStart.isSameOrBefore(endOfDay)
-      );
-    })
-    .sort((a, b) => moment(a.start).diff(moment(b.start)));
-}
-
-// Generate empathetic response
-function generateEmpatheticResponse(input) {
-  // Store in conversation history
-  conversationHistory.push({ role: "user", content: input });
-
-  // Simple response generation based on keywords
-  let response = "";
-  const lowerInput = input.toLowerCase();
-
-  // Check for greetings
-  if (
-    lowerInput.includes("hello") ||
-    lowerInput.includes("hi ") ||
-    lowerInput === "hi"
-  ) {
-    response = `Hello ${userPreferences.name}! It's great to hear from you. How are you feeling today?`;
-  }
-  // Check for how are you
-  else if (lowerInput.includes("how are you")) {
-    response =
-      "I'm doing well, thanks for asking! I'm here to help make your day easier. What can I assist you with?";
-  }
-  // Check for schedule related queries
-  else if (
-    lowerInput.includes("schedule") ||
-    lowerInput.includes("calendar") ||
-    lowerInput.includes("events")
-  ) {
-    const todayEvents = getTodayEvents();
-    if (todayEvents.length > 0) {
-      response = `I see you have ${todayEvents.length} events today. Your next event is "${todayEvents[0].title}" ${moment(todayEvents[0].start).format("h:mm A")}. Would you like me to tell you more about your schedule?`;
-    } else {
-      response =
-        "You don't have any events scheduled for today. Looks like you have some free time!";
-    }
-  }
-  // Check for time related queries
-  else if (lowerInput.includes("time")) {
-    response = `The current time is ${moment().format("h:mm A")}. Is there anything specific you need to know about your schedule?`;
-  }
-  // Check for feeling queries
-  else if (
-    lowerInput.includes("feel") ||
-    lowerInput.includes("sad") ||
-    lowerInput.includes("happy") ||
-    lowerInput.includes("tired")
-  ) {
-    if (lowerInput.includes("sad")) {
-      response =
-        "I'm sorry to hear you're feeling down. Remember that it's okay to have off days. Would you like me to play some uplifting music or schedule some self-care time for you?";
-    } else if (lowerInput.includes("happy")) {
-      response =
-        "I'm so glad you're feeling good today! Your positive energy is contagious. Anything special planned that's got you in such a good mood?";
-    } else if (lowerInput.includes("tired")) {
-      response =
-        "Being tired can be tough. Maybe you could use a short break? Your next free time block is at 3 PM. Should I schedule a 15-minute rest period?";
-    } else {
-      response =
-        "I care about how you're feeling. Would you like to talk more about it?";
-    }
-  }
-  // Check for help queries
-  else if (
-    lowerInput.includes("help") ||
-    lowerInput.includes("what can you do")
-  ) {
-    response =
-      "I'm here to help you manage your schedule, control your smart devices, and be a supportive friend. You can ask me about your calendar, set reminders, or just chat if you need someone to talk to. What would you like help with today?";
-  }
-  // Default response
-  else {
-    response =
-      "I'm here for you. Tell me more about what's on your mind, or if you need help with your schedule or devices.";
-  }
-
-  // Store response in conversation history
-  conversationHistory.push({ role: "assistant", content: response });
-
-  return response;
-}
-
-// API routes
-app.get("/api/devices", async (req, res) => {
-  try {
-    // Try to discover real devices
-    await discoverNetworkDevices();
-
-    // If no real devices found, add mock devices
     if (discoveredDevices.length === 0) {
-      // Add network devices
-      discoveredDevices = [
-        {
-          deviceId: "network-router",
-          name: "WiFi Router",
-          type: "network",
-          status: "Online",
-          isActive: true,
-          details: {
-            manufacturer: "Netgear",
-            model: "Nighthawk",
-            ip: "192.168.1.1",
-            lastSeen: new Date().toISOString(),
-          },
-        },
-        {
-          deviceId: "network-pc",
-          name: "Desktop PC",
-          type: "computer",
-          status: "Online",
-          isActive: true,
-          details: {
-            ip: "192.168.1.120",
-            lastSeen: new Date().toISOString(),
-          },
-        },
-      ];
-
-      // Add mock smart home devices
-      discoveredDevices = [...discoveredDevices, ...mockDevices];
+      
+      discoveredDevices = [...discoveredDevices, ...];
     }
 
     res.json(discoveredDevices);
@@ -530,7 +164,7 @@ app.get("/api/preferences", (req, res) => {
 });
 
 app.get("/api/scenes", (req, res) => {
-  // Return mock scenes
+  
   const scenes = [
     {
       id: "scene-1",
@@ -602,7 +236,7 @@ app.get("/api/scenes", (req, res) => {
 });
 
 app.get("/api/automations", (req, res) => {
-  // Return mock automations
+  
   const automations = [
     {
       id: "auto-1",
@@ -656,7 +290,7 @@ app.get("/api/automations", (req, res) => {
 });
 
 app.get("/api/insights", (req, res) => {
-  // Return mock insights
+  
   const insights = [
     {
       id: "insight-1",

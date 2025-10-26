@@ -1,0 +1,23 @@
+[
+  {
+    "type": "system",
+    "title": "System Started",
+    "description": "JASON system initialized successfully",
+    "activityId": "f10e4ddb-da61-4b93-9a2c-38da5ee841b2",
+    "timestamp": "2025-05-21T19:02:27.271Z"
+  },
+  {
+    "type": "system",
+    "title": "System Started",
+    "description": "JASON system initialized successfully",
+    "activityId": "cc83191b-2edb-4366-b243-89c7b5a09997",
+    "timestamp": "2025-05-21T19:02:52.770Z"
+  },
+  {
+    "type": "system",
+    "title": "System Started",
+    "description": "JASON system initialized successfully",
+    "activityId": "ad87c2c4-34db-4b9b-a602-c008896e7be4",
+    "timestamp": "2025-05-25T06:51:16.093Z"
+  }
+]

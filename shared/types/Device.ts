@@ -2,6 +2,24 @@
  * Device type definitions for JASON
  */
 
+export enum DeviceType {
+  LIGHT = 'light',
+  THERMOSTAT = 'thermostat',
+  SPEAKER = 'speaker',
+  SECURITY_CAMERA = 'security_camera',
+  SENSOR = 'sensor',
+  MEDIA_PLAYER = 'media_player',
+  CAR = 'car',
+  COFFEE_MACHINE = 'coffee_machine',
+  DOOR_LOCK = 'door_lock',
+  APPLIANCE = 'appliance',
+  COMMUNICATION = 'communication', // For messages, calls
+  BROWSER = 'browser', // For JASON Cognition Engine & Browser
+  WELLNESS = 'wellness', // For biometric data
+  PRODUCTIVITY = 'productivity', // For calendar integration
+  SECURITY_SYSTEM = 'security_system', // New device type for security system
+}
+
 export interface DeviceState {
   on?: boolean;
   brightness?: number;
@@ -23,7 +41,7 @@ export interface DeviceState {
 export interface Device {
   id: string;
   name: string;
-  type: string;
+  type: DeviceType; // Use the enum here
   manufacturer?: string;
   model?: string;
   firmwareVersion?: string;
@@ -35,6 +53,7 @@ export interface Device {
   location?: string;
   room?: string;
   lastControlSource?: string;
+  protocol?: string; // Add protocol property
   [key: string]: any;
 }
 

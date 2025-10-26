@@ -1,0 +1,2 @@
+server/core/cognition/knowledgeGraph.ts
+server/core/voice/textToSpeech.ts

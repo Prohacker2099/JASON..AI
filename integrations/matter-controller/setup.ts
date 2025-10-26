@@ -1,35 +1,4 @@
-/**
- * Matter Controller Setup
- *
- * This script sets up the Matter controller by creating necessary directories
- * and configuration files.
- */
 
-import fs from "fs";
-import path from "path";
-import { Logger } from "../../server/services/logger.js";
-
-const logger = new Logger("MatterSetup");
-
-// Define paths
-const STORAGE_DIR = path.join(__dirname, "storage");
-const CONFIG_FILE = path.join(__dirname, "config.json");
-
-// Default configuration
-const DEFAULT_CONFIG = {
-  enabled: true,
-  mockMode: true, // Use mock mode for development until Matter SDK is available
-  storagePath: STORAGE_DIR,
-  commissioningOptions: {
-    deviceControllerOptions: {
-      storagePath: STORAGE_DIR,
-    },
-  },
-};
-
-/**
- * Create storage directory
- */
 function createStorageDirectory() {
   if (!fs.existsSync(STORAGE_DIR)) {
     fs.mkdirSync(STORAGE_DIR, { recursive: true });

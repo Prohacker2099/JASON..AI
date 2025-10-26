@@ -10,35 +10,7 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import fs from "fs";
 
-// Load environment variables
-dotenv.config();
 
-// Initialize Express app
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.join(__dirname, "..");
-
-// Serve static files from the React app build directory
-const clientBuildPath = path.join(rootDir, "client/build");
-
-// Check if client build exists
-if (!fs.existsSync(clientBuildPath)) {
-  console.error(
-    '❌ Client build not found. Please run "npm run build:client" first.',
-  );
-  process.exit(1);
-}
-
-// Serve static files from the React app
-app.use(express.static(clientBuildPath));
-
-// Serve API routes
-app.use("/api", (req, res) => {
-  // This is a placeholder - in a real app, you would import your API routes here
   res.json({ message: "API endpoint" });
 });
 

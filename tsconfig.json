@@ -1,22 +1,26 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "skipLibCheck": true,
-    "noEmitOnError": false,
-    "strict": false,
-    "noImplicitAny": false,
-    "allowJs": true,
-    "checkJs": false,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
-  },
-  "files": [
-    "server/app.ts",
-    "server/routes.ts"
-  ],
-  "compilerOptions": {
-    "moduleResolution": "NodeNext"
-  }
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "outDir": "./dist",
+        "rootDir": ".",
+        "sourceMap": true,
+        "types": ["node"]
+    },
+    "include": [
+        "server/**/*",
+        "shared/**/*",
+        "server/src/**/*",
+        "server/types.d.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
 }

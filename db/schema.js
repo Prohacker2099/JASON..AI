@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.scenes = void 0;
 var pg_core_1 = require("drizzle-orm/pg-core");
-// Placeholder for scenes table - adapt columns as needed based on SceneDatabase.ts usage
+
 exports.scenes = (0, pg_core_1.pgTable)("scenes", {
   id: (0, pg_core_1.varchar)("id").primaryKey(), // Assuming id is a string, adjust if it's serial
   name: (0, pg_core_1.varchar)("name", { length: 255 }).notNull(),

@@ -1,28 +1,40 @@
 {
-  "name": "jason-client",
+  "name": "jason-ai-client",
   "version": "1.0.0",
   "private": true,
+  "proxy": "http://localhost:3001",
   "dependencies": {
-    "@emotion/react": "^11.11.0",
-    "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.11.16",
-    "@mui/material": "^5.13.0",
-    "autoprefixer": "^10.4.14",
-    "framer-motion": "^10.16.4",
-    "lucide-react": "^0.279.0",
-    "postcss": "^8.4.24",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.1",
+    "@mui/material": "^7.3.1",
+    "@react-spring/web": "^10.0.1",
+    "axios": "^1.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "esbuild": "^0.25.8",
+    "express": "^4.18.2",
+    "framer-motion": "^12.23.12",
+    "mqtt": "^4.3.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.14.0",
-    "react-scripts": "5.0.1",
-    "tailwindcss": "^3.3.2"
+    "react-icons": "^5.5.0",
+    "styled-components": "^6.1.19",
+    "winston": "^3.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@types/styled-components": "^5.1.34",
+    "@vitejs/plugin-react": "^5.0.0",
+    "vite": "^7.1.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "dev": "react-scripts start"
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
   },
   "eslintConfig": {
     "extends": [

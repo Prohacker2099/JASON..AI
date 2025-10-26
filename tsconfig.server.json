@@ -8,13 +8,16 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist/server",
-    "rootDir": "./server/src",
+    "rootDir": ".",
     "declaration": true,
     "allowJs": true,
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": true, // Added to allow .ts extensions in imports
-    "noEmit": true // Added to resolve error with allowImportingTsExtensions
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
-  "include": ["server/src/**/*.ts"],
+  "include": [
+    "server/**/*.ts",
+    "shared/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist", "client"]
 }

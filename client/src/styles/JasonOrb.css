@@ -1,0 +1,62 @@
+.jason-orb {
+  background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+  border: none;
+  border-radius: 50%; /* Make it a perfect circle */
+  width: 50px; /* Adjust size as needed */
+  height: 50px; /* Adjust size as needed */
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(78, 205, 193, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.jason-orb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(78, 205, 193, 0.4);
+}
+
+.jason-orb .orb-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+  animation: none; /* Reset animation */
+}
+
+.jason-orb.listening .orb-inner {
+  animation: orb-pulse 1.5s infinite ease-out;
+}
+
+.jason-orb.processing .orb-inner {
+  animation: orb-glow 1.5s infinite alternate;
+}
+
+@keyframes orb-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+}
+
+@keyframes orb-glow {
+  0% {
+    box-shadow: 0 0 5px #4ecdc4, 0 0 10px #4ecdc4;
+  }
+  100% {
+    box-shadow: 0 0 20px #4ecdc4, 0 0 30px #4ecdc4;
+  }
+}

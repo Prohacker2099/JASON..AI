@@ -1,0 +1,67 @@
+/* SphereNavigation.css */
+
+.sphere-navigation-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1300; /* Above most content, below snackbars/modals */
+}
+
+.sphere-orb {
+  background-color: #90caf9; /* Primary color */
+  color: #121212; /* Dark text for contrast */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease-in-out;
+}
+
+.sphere-orb.open {
+  transform: rotate(45deg); /* Rotate when open for a subtle effect */
+}
+
+.radial-menu {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 200px; /* Diameter of the radial menu */
+  height: 200px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; /* Allow clicks to pass through when closed */
+}
+
+.radial-menu-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: 0 0; /* Rotate around the center */
+  pointer-events: auto; /* Enable clicks on items */
+}
+
+.radial-menu-item .MuiIconButton-root {
+  background-color: #2a2a2a; /* Darker background for menu items */
+  color: #e0e0e0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.radial-menu-item .MuiIconButton-root:hover {
+  background-color: #3a3a3a;
+}
+
+@keyframes glowing-node {
+  0% {
+    box-shadow: 0 0 5px rgba(144, 202, 249, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(144, 202, 249, 1);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(144, 202, 249, 0.7);
+  }
+}
+
+.radial-menu-item .glowing-node {
+  animation: glowing-node 1.5s infinite alternate;
+}

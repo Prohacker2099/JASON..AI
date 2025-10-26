@@ -1,0 +1,111 @@
+/* Core app styles for JASON client */
+
+.jason-app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: min-content;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* AI Interface Layout */
+.ai-interface {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.ai-header {
+  grid-column: 1 / span 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ai-title {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+}
+
+.ai-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-indicator {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  background: rgba(79,70,229,0.15);
+  border: 1px solid rgba(79,70,229,0.35);
+}
+.status-indicator.processing { background: rgba(255,255,0,0.12); border-color: rgba(255,255,0,0.35); }
+.status-indicator.learning { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.35); }
+.status-indicator.predicting { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.35); }
+
+.neural-activity { opacity: 0.85; }
+
+.ai-brain-container {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  height: 520px;
+}
+
+.ai-sidebar {
+  display: grid;
+  gap: 16px;
+}
+
+.ai-predictions-panel,
+.ai-learning-panel,
+.ai-controls-panel {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+/* Buttons */
+.ai-btn {
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s ease;
+  background: rgba(255,255,255,0.08);
+  color: inherit;
+  margin-right: 8px;
+}
+.ai-btn:hover { transform: translateY(-1px); }
+.ai-btn:active { transform: translateY(0); }
+
+.ai-btn.primary { background: #4f46e5; color: #fff; }
+.ai-btn.secondary { background: rgba(255,255,255,0.12); }
+.ai-btn.success { background: #10b981; color: #fff; }
+.ai-btn.warning { background: #f59e0b; color: #111; }
+.ai-btn.danger { background: #ef4444; color: #fff; }
+.ai-btn.full-width { width: 100%; margin-right: 0; }
+
+/* Panels */
+.predictions-list { display: grid; gap: 10px; }
+.prediction-card { padding: 12px; border-radius: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); }
+.prediction-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.confidence-badge { font-weight: 700; }
+
+.learning-progress-3d { min-width: 260px; }
+.progress-bar { height: 8px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background: #00ffff; box-shadow: 0 0 12px rgba(0,255,255,0.35); }
+
+/* Responsive tweaks */
+@media (max-width: 992px) {
+  .ai-interface { grid-template-columns: 1fr; }
+  .ai-header { grid-column: auto; }
+}

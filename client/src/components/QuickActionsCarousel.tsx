@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSmartHomeContext } from '../../context/SmartHomeContext';
-import { Device, DeviceStatus } from '../../types/SmartHomeTypes';
+import { useSmartHomeContext } from '../lib/SmartHomeContext';
+import { Device, DeviceState } from '../lib/types';
 
 interface QuickActionsCarouselProps {
   devices: Device[];
 }
 
 const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({ devices }) => {
-  const { dispatch, state } = useSmartHomeContext();
+  const { dispatch, updateDeviceState } = useSmartHomeContext();
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,10 +20,9 @@ const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({ devices }) 
   const handleAction = (device: Device) => {
     // Simulate action - Replace with actual device control logic
     console.log(`Executing action for device: ${device.name}`);
-    dispatch({
-      type: 'DEVICE_ACTION',
-      payload: { device },
-    });
+    // For demonstration, toggle the 'on' state if it exists, otherwise set a generic 'active' state
+    const newState: DeviceState = { on: !device.state.on };
+    updateDeviceState({ deviceId: device.id, newState });
   };
 
   return (
@@ -34,7 +33,7 @@ const QuickActionsCarousel: React.FC<QuickActionsCarouselProps> = ({ devices }) 
           className="quick-action"
           onClick={() => handleAction(device)}
         >
-          {device.name} - {device.status}
+          {device.name} - {device.state.on ? 'On' : 'Off'}
         </div>
       ))}
     </div>

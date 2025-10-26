@@ -1,145 +1,26 @@
-/**
- * HomeKit Bridge Integration
- *
- * This module provides integration with Apple HomeKit, allowing JASON to expose
- * its discovered devices to HomeKit for control through the Apple Home app and Siri.
- */
 
-import { EventEmitter } from "events";
-import { Logger } from "../server/services/logger";
-import { Device, DeviceCommand, DeviceResponse } from "../shared/types/Device";
-import { BaseDevicePlugin } from "./BaseDevicePlugin";
-
-const logger = new Logger("HomeKitBridge");
-
-// This would be replaced with actual HAP-NodeJS import in production
-// import * as hap from 'hap-nodejs';
-// const { Accessory, Service, Characteristic, uuid, Bridge } = hap;
-
-class HomeKitBridge extends BaseDevicePlugin {
-  private bridge: any = null;
-  private accessories: Map<string, any> = new Map();
-  private mockMode: boolean = true; // Use mock mode for development until HAP-NodeJS is integrated
-  public displayName: string;
-  public description: string;
-
-  constructor() {
-    super("homekit", "1.0.0", [
-      "light",
-      "switch",
-      "sensor",
-      "thermostat",
-      "lock",
-      "fan",
-      "outlet",
-    ]);
-    this.displayName = "HomeKit Bridge";
-    this.description = "Bridge for exposing JASON devices to Apple HomeKit";
-
-    logger.info("HomeKit Bridge initialized");
-  }
-
-  /**
-   * Initialize the HomeKit bridge
-   */
   async initialize(): Promise<boolean> {
     try {
-      if (this.mockMode) {
-        logger.info("HomeKit Bridge running in mock mode");
+      if (this.) {
+        logger.info("HomeKit Bridge running in  mode");
         return true;
       }
 
-      // In a real implementation, we would initialize HAP-NodeJS here
-      // For example:
-      // hap.init();
-      // this.bridge = new Bridge('JASON Bridge', uuid.generate('jason.bridge'));
-      // this.bridge.publish({
-      //   username: 'CC:22:3D:E3:CE:30',
-      //   port: 51826,
-      //   pincode: '031-45-154',
-      //   category: hap.Categories.BRIDGE
-      // });
-
-      logger.info("HomeKit Bridge initialized successfully");
-      return true;
-    } catch (error) {
-      logger.error("Error initializing HomeKit Bridge:", error);
-      return false;
-    }
-  }
-
-  /**
-   * Add a device to the HomeKit bridge
-   */
-  async addDevice(device: Device): Promise<boolean> {
-    try {
-      if (this.mockMode) {
+      
         logger.info(
-          `[Mock] Added device to HomeKit: ${device.name} (${device.id})`,
+          `[] Added device to HomeKit: ${device.name} (${device.id})`,
         );
         return true;
       }
 
-      // In a real implementation, we would create a HomeKit accessory and add it to the bridge
-      // For example:
-      // const accessory = new Accessory(device.name, uuid.generate(device.id));
-      //
-      // // Add appropriate services based on device type
-      // switch (device.type) {
-      //   case 'light':
-      //     this.configureLight(accessory, device);
-      //     break;
-      //   case 'switch':
-      //     this.configureSwitch(accessory, device);
-      //     break;
-      //   // Add more device types as needed
-      // }
-      //
-      // this.bridge.addBridgedAccessory(accessory);
-      // this.accessories.set(device.id, accessory);
-
-      logger.info(`Added device to HomeKit: ${device.name} (${device.id})`);
-      return true;
-    } catch (error) {
-      logger.error(`Error adding device to HomeKit: ${device.id}`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Remove a device from the HomeKit bridge
-   */
-  async removeDevice(deviceId: string): Promise<boolean> {
-    try {
-      if (this.mockMode) {
-        logger.info(`[Mock] Removed device from HomeKit: ${deviceId}`);
+      
+        logger.info(`[] Removed device from HomeKit: ${deviceId}`);
         return true;
       }
 
-      // In a real implementation, we would remove the accessory from the bridge
-      // For example:
-      // const accessory = this.accessories.get(deviceId);
-      // if (accessory) {
-      //   this.bridge.removeBridgedAccessory(accessory);
-      //   this.accessories.delete(deviceId);
-      // }
-
-      logger.info(`Removed device from HomeKit: ${deviceId}`);
-      return true;
-    } catch (error) {
-      logger.error(`Error removing device from HomeKit: ${deviceId}`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Update a device's state in HomeKit
-   */
-  async updateDeviceState(deviceId: string, state: any): Promise<boolean> {
-    try {
-      if (this.mockMode) {
+      
         logger.info(
-          `[Mock] Updated device state in HomeKit: ${deviceId}`,
+          `[] Updated device state in HomeKit: ${deviceId}`,
           state,
         );
         return true;

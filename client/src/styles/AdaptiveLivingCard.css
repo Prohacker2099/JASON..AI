@@ -1,0 +1,107 @@
+.adaptive-living-card {
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  min-height: 150px;
+  position: relative;
+  overflow: hidden;
+}
+
+.adaptive-living-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #90caf9; /* Primary color */
+  position: relative;
+  z-index: 1;
+}
+
+.card-icon img {
+  width: 60px;
+  height: 60px;
+}
+
+.card-content h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: white;
+  z-index: 1;
+}
+
+.card-content p {
+  margin: 5px 0 0;
+  font-size: 1rem;
+  color: #bbb;
+  z-index: 1;
+}
+
+/* Dynamic Visuals Styling */
+.dynamic-light-visual,
+.dynamic-climate-visual,
+.dynamic-media-visual,
+.dynamic-security-visual,
+.dynamic-wellness-visual,
+.dynamic-productivity-visual,
+.dynamic-communication-visual,
+.dynamic-browser-visual {
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  opacity: 0.3;
+}
+
+/* Specific card background colors/styles */
+.adaptive-living-card.lighting-on {
+  background: linear-gradient(135deg, #ffeb3b, #ffc107);
+  color: #333;
+}
+
+.adaptive-living-card.lighting-on .card-content h3,
+.adaptive-living-card.lighting-on .card-content p {
+  color: #333;
+}
+
+.adaptive-living-card.climate-heating {
+  background: linear-gradient(135deg, #ff5722, #ff9800);
+}
+
+.adaptive-living-card.climate-cooling {
+  background: linear-gradient(135deg, #2196f3, #03a9f4);
+}
+
+.adaptive-living-card.security-alert-flash {
+  background-color: #f44336;
+}
+
+.adaptive-living-card.communication-unread-pulse {
+  background: linear-gradient(135deg, #673ab7, #9c27b0);
+}
+
+.adaptive-living-card.productivity-active-glow {
+  background: linear-gradient(135deg, #4caf50, #8bc34a);
+}
+
+.adaptive-living-card.wellness-active-flow {
+  background: linear-gradient(135deg, #e91e63, #f06292);
+}
+
+.adaptive-living-card.browser-active-ripple {
+  background: linear-gradient(135deg, #00bcd4, #00e5ff);
+}

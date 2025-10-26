@@ -8,7 +8,7 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
-// Placeholder for scenes table - adapt columns as needed based on SceneDatabase.ts usage
+
 export const scenes = pgTable("scenes", {
   id: varchar("id").primaryKey(), // Assuming id is a string, adjust if it's serial
   name: varchar("name", { length: 255 }).notNull(),

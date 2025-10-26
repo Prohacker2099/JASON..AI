@@ -1,0 +1,66 @@
+[
+  {
+    "id": "scene-1",
+    "name": "Movie Night",
+    "description": "Dim lights and set temperature for movie watching",
+    "deviceStates": [
+      { "deviceId": "light-1", "state": { "power": true, "brightness": 30, "color": "#3C6CFF" } },
+      { "deviceId": "light-2", "state": { "power": false } },
+      { "deviceId": "light-3", "state": { "power": false } },
+      { "deviceId": "thermostat-1", "state": { "temperature": 72 } },
+      { "deviceId": "tv-1", "state": { "power": true, "input": "hdmi1" } }
+    ]
+  },
+  {
+    "id": "scene-2",
+    "name": "Good Morning",
+    "description": "Brighten lights and adjust temperature for morning",
+    "deviceStates": [
+      { "deviceId": "light-1", "state": { "power": true, "brightness": 100, "color": "#FFFFFF" } },
+      { "deviceId": "light-2", "state": { "power": true, "brightness": 80, "color": "#FFFFFF" } },
+      { "deviceId": "light-3", "state": { "power": true, "brightness": 100, "color": "#FFFFFF" } },
+      { "deviceId": "thermostat-1", "state": { "temperature": 70 } },
+      { "deviceId": "speaker-1", "state": { "power": true, "volume": 40, "playing": true } }
+    ]
+  },
+  {
+    "id": "scene-3",
+    "name": "Away Mode",
+    "description": "Secure home when nobody is present",
+    "deviceStates": [
+      { "deviceId": "light-1", "state": { "power": false } },
+      { "deviceId": "light-2", "state": { "power": false } },
+      { "deviceId": "light-3", "state": { "power": false } },
+      { "deviceId": "thermostat-1", "state": { "temperature": 65 } },
+      { "deviceId": "lock-1", "state": { "locked": true } },
+      { "deviceId": "lock-2", "state": { "locked": true } },
+      { "deviceId": "camera-1", "state": { "power": true, "recording": true } },
+      { "deviceId": "camera-2", "state": { "power": true, "recording": true } }
+    ]
+  },
+  {
+    "id": "scene-4",
+    "name": "Evening Relax",
+    "description": "Warm lighting and comfortable temperature for evening relaxation",
+    "deviceStates": [
+      { "deviceId": "light-1", "state": { "power": true, "brightness": 50, "color": "#FF9D45" } },
+      { "deviceId": "light-2", "state": { "power": true, "brightness": 40, "color": "#FF9D45" } },
+      { "deviceId": "light-3", "state": { "power": false } },
+      { "deviceId": "thermostat-1", "state": { "temperature": 72 } },
+      { "deviceId": "speaker-1", "state": { "power": true, "volume": 30, "playing": true } }
+    ]
+  },
+  {
+    "id": "scene-5",
+    "name": "Night Mode",
+    "description": "Minimal lighting for nighttime navigation",
+    "deviceStates": [
+      { "deviceId": "light-1", "state": { "power": true, "brightness": 10, "color": "#FF5A5A" } },
+      { "deviceId": "light-2", "state": { "power": false } },
+      { "deviceId": "light-3", "state": { "power": false } },
+      { "deviceId": "thermostat-1", "state": { "temperature": 68 } },
+      { "deviceId": "lock-1", "state": { "locked": true } },
+      { "deviceId": "lock-2", "state": { "locked": true } }
+    ]
+  }
+]

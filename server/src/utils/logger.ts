@@ -1,3 +1,18 @@
-{"error":"model 'llama2:latest' not found"}
+// server/src/utils/logger.ts
 
-/* Last enhanced by JASON.visioneer: 2025-07-15T23:08:12.405440 */
+import winston from 'winston';
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'logs/combined.log' }),
+  ],
+});
+
+export { logger };

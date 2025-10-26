@@ -57,7 +57,7 @@ declare module "bonjour-service" {
     destroy(): void;
   }
 
-  export { function } bonjour(options?: {
+  export function bonjour(options?: {
     interface?: string;
     multicast?: boolean;
     port?: number;

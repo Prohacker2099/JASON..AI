@@ -1,0 +1,161 @@
+/* Adaptive Living Card Animations */
+
+/* Lighting Card Animations */
+.lighting-on .dynamic-light-visual {
+  animation: light-pulse 1.5s infinite alternate;
+}
+
+@keyframes light-pulse {
+  from {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.5;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Climate Card Animations */
+.climate-heating .dynamic-climate-visual {
+  animation: heat-wave 2s infinite;
+}
+
+@keyframes heat-wave {
+  0% {
+    transform: translate(-50%, -50%) translateY(0px);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-5px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translateY(0px);
+    opacity: 0.7;
+  }
+}
+
+.climate-cooling .dynamic-climate-visual {
+  animation: cool-breeze 2s infinite;
+}
+
+@keyframes cool-breeze {
+  0% {
+    transform: translate(-50%, -50%) translateY(0px);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(5px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translateY(0px);
+    opacity: 0.7;
+  }
+}
+
+/* Media Card Animations */
+.media-playing-pulse .dynamic-media-visual {
+  animation: media-pulse 1s infinite;
+}
+
+@keyframes media-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Security Card Animations */
+.security-alert-flash .dynamic-security-visual {
+  animation: security-flash 0.5s infinite alternate;
+}
+
+@keyframes security-flash {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.3;
+  }
+}
+
+/* Wellness Card Animations */
+.wellness-active-flow .dynamic-wellness-visual {
+  animation: wellness-heartbeat 1.2s infinite;
+}
+
+@keyframes wellness-heartbeat {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  25% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  75% {
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Productivity Card Animations */
+.productivity-active-glow .dynamic-productivity-visual {
+  animation: productivity-glow 2s infinite alternate;
+}
+
+@keyframes productivity-glow {
+  from {
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.7);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(76, 175, 80, 1);
+  }
+}
+
+/* Communication Card Animations */
+.communication-unread-pulse .dynamic-communication-visual {
+  animation: communication-pulse 1s infinite;
+}
+
+@keyframes communication-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Browser Card Animations */
+.browser-active-ripple .dynamic-browser-visual {
+  animation: browser-ripple 2s infinite;
+}
+
+@keyframes browser-ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.5;
+  }
+}

@@ -1,1 +1,6 @@
-/* Last enhanced by JASON.visioneer: 2025-07-15T23:49:35.618728 */
+import { Device, DeviceType } from '../lib/types';
+
+
+  return []; 
+  return; // Resolve immediately or throw an error until implemented
+};

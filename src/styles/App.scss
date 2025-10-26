@@ -1,0 +1,123 @@
+// Color Palette
+$primary-color: #4A90E2;
+$secondary-color: #50E3C2;
+$background-color: #1A1A2E;
+$text-color: #E2E2E2;
+$card-background: #16213E;
+
+// Mixins
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin card-shadow {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+// Global Styles
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: $background-color;
+  color: $text-color;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+.jason-app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+// Header Styles
+.jason-pulse-header {
+  background: linear-gradient(135deg, $primary-color, $secondary-color);
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+}
+
+// Main Content Styles
+.jason-universe {
+  padding: 2rem;
+}
+
+.devices-overview {
+  h2 {
+    color: $secondary-color;
+    margin-bottom: 1.5rem;
+  }
+
+  .device-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .device-card {
+    background-color: $card-background;
+    border-radius: 8px;
+    padding: 1.5rem;
+    @include card-shadow;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.02);
+    }
+
+    h3 {
+      color: $primary-color;
+      margin-bottom: 1rem;
+    }
+
+    .device-actions {
+      margin-top: 1rem;
+      @include flex-center;
+    }
+
+    .toggle-btn {
+      background-color: $secondary-color;
+      color: $background-color;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &.active {
+        background-color: #FF6B6B;
+      }
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+}
+
+// Footer Styles
+.jason-footer {
+  background-color: $card-background;
+  color: $text-color;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+// Responsive Adjustments
+@media (max-width: 768px) {
+  .devices-overview .device-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

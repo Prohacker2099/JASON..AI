@@ -3,7 +3,7 @@ declare module "ws" {
   import { IncomingMessage } from "http";
   import { Socket } from "net";
 
-  export { class } WebSocket extends EventEmitter {
+  export class WebSocket extends EventEmitter {
     constructor(address: string, options?: any);
 
     send(data: any, callback?: (err?: Error) => void): void;

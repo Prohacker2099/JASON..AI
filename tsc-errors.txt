@@ -1,0 +1,2 @@
+server/core/cognition/knowledgeGraph.ts(4,24): error TS2307: Cannot find module '../device/utils/logger' or its corresponding type declarations.
+server/core/voice/textToSpeech.ts(4,24): error TS2307: Cannot find module '../device/utils/logger' or its corresponding type declarations.

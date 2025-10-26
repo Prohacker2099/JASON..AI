@@ -1,0 +1,40 @@
+/* JasonConnectPage.css */
+
+.MuiTabs-indicator {
+  height: 3px; /* Thicker indicator */
+  border-radius: 2px;
+}
+
+.MuiTab-root {
+  text-transform: none; /* Keep tab labels as is */
+  font-weight: bold;
+}
+
+.MuiListItemText-primary {
+  font-weight: bold;
+}
+
+.MuiListItemText-secondary {
+  font-size: 0.85em;
+}
+
+/* Custom scrollbar for message list */
+.MuiList-root {
+  scrollbar-width: thin;
+  scrollbar-color: #00c6ff #2a2a2a;
+}
+
+.MuiList-root::-webkit-scrollbar {
+  width: 8px;
+}
+
+.MuiList-root::-webkit-scrollbar-track {
+  background: #2a2a2a;
+  border-radius: 10px;
+}
+
+.MuiList-root::-webkit-scrollbar-thumb {
+  background-color: #00c6ff;
+  border-radius: 10px;
+  border: 2px solid #2a2a2a;
+}

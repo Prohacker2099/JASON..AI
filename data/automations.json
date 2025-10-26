@@ -1,0 +1,54 @@
+[
+  {
+    "id": "auto-1",
+    "name": "Morning Routine",
+    "description": "Activate Good Morning scene at 7am on weekdays",
+    "trigger": { "type": "time", "time": "07:00", "days": ["Mon", "Tue", "Wed", "Thu", "Fri"] },
+    "action": { "type": "scene", "sceneId": "scene-2" },
+    "isActive": true
+  },
+  {
+    "id": "auto-2",
+    "name": "Away Mode",
+    "description": "Activate Away Mode when everyone leaves home",
+    "trigger": { "type": "geofence", "action": "exit" },
+    "action": { "type": "scene", "sceneId": "scene-3" },
+    "isActive": true
+  },
+  {
+    "id": "auto-3",
+    "name": "Sunset Lights",
+    "description": "Turn on lights at sunset",
+    "trigger": { "type": "sun", "event": "sunset" },
+    "action": { "type": "device", "deviceId": "light-1", "state": { "power": true, "brightness": 70 } },
+    "isActive": true
+  },
+  {
+    "id": "auto-4",
+    "name": "Night Mode",
+    "description": "Activate Night Mode at 11pm",
+    "trigger": { "type": "time", "time": "23:00", "days": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] },
+    "action": { "type": "scene", "sceneId": "scene-5" },
+    "isActive": true
+  },
+  {
+    "id": "auto-5",
+    "name": "Motion Detection",
+    "description": "Turn on backyard light when motion is detected",
+    "trigger": { "type": "device", "deviceId": "camera-2", "property": "motion", "value": true },
+    "action": { "type": "device", "deviceId": "light-3", "state": { "power": true, "brightness": 100 } },
+    "isActive": true
+  },
+  {
+    "id": "auto-6",
+    "name": "Energy Saver",
+    "description": "Turn off all lights when no one is home for 30 minutes",
+    "trigger": { "type": "presence", "condition": "away", "duration": 30 },
+    "action": { "type": "multiDevice", "devices": [
+      { "deviceId": "light-1", "state": { "power": false } },
+      { "deviceId": "light-2", "state": { "power": false } },
+      { "deviceId": "light-3", "state": { "power": false } }
+    ]},
+    "isActive": true
+  }
+]
