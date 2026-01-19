@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSpring, animated } from '@react-spring/web';
+import type { SpeechRecognition } from '../lib/types';
 
 interface VoiceControlIndicatorProps {
   isActive: boolean;
@@ -15,12 +16,18 @@ const VoiceControlIndicator: React.FC<VoiceControlIndicatorProps> = ({
 }) => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const isActiveRef = useRef<boolean>(isActive);
 
   const pulseAnimation = useSpring({
-    scale: isActive ? [1, 1.3, 1] : [1],
+    from: { transform: 'scale(1)' },
+    to: { transform: isActive ? 'scale(1.3)' : 'scale(1)' },
     config: { duration: 1000 },
-    loop: isActive
+    loop: isActive ? { reverse: true } : false
   });
+
+  useEffect(() => {
+    isActiveRef.current = isActive;
+  }, [isActive]);
 
   useEffect(() => {
     // Initialize Web Speech API
@@ -44,11 +51,11 @@ const VoiceControlIndicator: React.FC<VoiceControlIndicatorProps> = ({
 
         recognitionRef.current.onerror = (event: any) => {
           console.error('Speech recognition error:', event.error);
-          setIsActive(false);
+          onToggle(false);
         };
 
         recognitionRef.current.onend = () => {
-          if (isActive) {
+          if (isActiveRef.current) {
             recognitionRef.current?.start();
           }
         };
@@ -69,6 +76,7 @@ const VoiceControlIndicator: React.FC<VoiceControlIndicatorProps> = ({
   }, [isActive]);
 
   const handleVoiceCommand = (command: string) => {
+    try { onCommand(command); } catch {}
     // Voice command processing
     if (command.includes('dashboard') || command.includes('home')) {
       window.dispatchEvent(new CustomEvent('voice-navigate', { detail: 'dashboard' }));
@@ -95,7 +103,7 @@ const VoiceControlIndicator: React.FC<VoiceControlIndicatorProps> = ({
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
-    setIsActive(!isActive);
+    onToggle(!isActive);
   };
 
   return (

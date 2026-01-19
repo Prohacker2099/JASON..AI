@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import * as tf from '@tensorflow/tfjs-node'
+import tf from '../tf'
 import fs from 'fs'
 import path from 'path'
 import { Experience, ExperienceReplayBuffer } from './Memory'
@@ -8,6 +8,7 @@ import { ValuePolicy, ValueWeights, defaultWeights } from './ValuePolicy'
 import { RateLimiter, Semaphore } from './Limiter'
 import { logDecision, logAction, logWeights, logTrainer, logExperience } from './Persistence'
 import { alignmentModel } from './Alignment'
+import { buildPolicyModel, PolicyArchitectureId, listPolicyArchitectures } from './PolicyArchitectures'
 import { permissionManager } from '../../trust/PermissionManager'
 
 export interface EngineConfig {
@@ -21,20 +22,22 @@ export interface EngineConfig {
   batchSize?: number
   targetUpdateEvery?: number
   modelDir?: string
+  policyArchitectureId?: PolicyArchitectureId
 }
 
 export type DecideResult = { actionIndex: number; qValues: number[] }
 export type ActResult = DecideResult & { result: ExecutionResult; reward: number }
 
 export class SelfLearningEngine extends EventEmitter {
-  private model: tf.LayersModel | null = null
-  private targetModel: tf.LayersModel | null = null
+  private model: any | null = null
+  private targetModel: any | null = null
   private memory = new ExperienceReplayBuffer(4000)
   private adapters = new AdapterRegistry()
   private valuePolicy = new ValuePolicy()
   private trainLimiter = new RateLimiter(2)
   private trainSemaphore = new Semaphore(1)
   private resourcePolicy = { maxRps: 2, maxConcurrent: 1, maxHeapMB: 512 }
+  private policyArchitectureId: PolicyArchitectureId = 'dqn_mlp'
 
   private cfg: Required<EngineConfig> = {
     stateSize: 16,
@@ -46,7 +49,8 @@ export class SelfLearningEngine extends EventEmitter {
     epsilonDecay: 0.995,
     batchSize: 32,
     targetUpdateEvery: 200,
-    modelDir: path.join(process.cwd(), 'data', 'models', 'selflearning')
+    modelDir: path.join(process.cwd(), 'data', 'models', 'selflearning'),
+    policyArchitectureId: 'dqn_mlp'
   }
 
   private epsilon = this.cfg.epsilonStart
@@ -99,14 +103,15 @@ export class SelfLearningEngine extends EventEmitter {
       training: this.training,
       lastLoss: this.lastLoss,
       modelDir: this.cfg.modelDir,
-      resourcePolicy: this.resourcePolicy
+      resourcePolicy: this.resourcePolicy,
+      policyArchitectureId: this.policyArchitectureId
     }
   }
 
   async decide(state: number[] | Float32Array, candidateActions?: ActionDefinition[], explore = true): Promise<DecideResult> {
     await this.initializeIfNeeded()
     const s = this.toTensor(state)
-    const q = (this.model as tf.LayersModel).predict(s) as tf.Tensor
+    const q = (this.model as any).predict(s) as any
     const qVals = Array.from(await q.data()) as number[]
     s.dispose(); q.dispose()
 
@@ -222,10 +227,10 @@ export class SelfLearningEngine extends EventEmitter {
         const states = tf.tensor2d(batch.map(b => Array.from(b.state)), [batch.length, this.cfg.stateSize])
         const nextStates = tf.tensor2d(batch.map(b => Array.from(b.nextState)), [batch.length, this.cfg.stateSize])
 
-        const qNext = (this.targetModel as tf.LayersModel).predict(nextStates) as tf.Tensor
+        const qNext = (this.targetModel as any).predict(nextStates) as any
         const maxNext = tf.max(qNext, 1)
 
-        const qPred = (this.model as tf.LayersModel).predict(states) as tf.Tensor
+        const qPred = (this.model as any).predict(states) as any
         const qTarget = qPred.arraySync() as number[][]
 
         for (let i = 0; i < batch.length; i++) {
@@ -237,7 +242,7 @@ export class SelfLearningEngine extends EventEmitter {
 
         const y = tf.tensor2d(qTarget, [batch.length, this.cfg.actionSize])
 
-        const history = await (this.model as tf.LayersModel).fit(states, y, { epochs: 1, batchSize: Math.min(32, batch.length), verbose: 0 })
+        const history = await (this.model as any).fit(states, y, { epochs: 1, batchSize: Math.min(32, batch.length), verbose: 0 })
         lossValue = (history.history.loss?.[0] as number) || 0
 
         states.dispose(); nextStates.dispose(); qNext.dispose(); maxNext.dispose(); qPred.dispose(); y.dispose()
@@ -272,12 +277,16 @@ export class SelfLearningEngine extends EventEmitter {
 
   async save(): Promise<void> {
     await this.ensureModelDir()
-    await (this.model as tf.LayersModel).save('file://' + this.cfg.modelDir)
+    await (this.model as any).save('file://' + this.cfg.modelDir)
   }
 
   async load(): Promise<void> {
-    this.model = await tf.loadLayersModel('file://' + path.join(this.cfg.modelDir, 'model.json'))
-    await this.buildTargetFromModel()
+    try {
+      this.model = await tf.loadLayersModel('file://' + path.join(this.cfg.modelDir, 'model.json'))
+      await this.buildTargetFromModel()
+    } catch {
+      await this.build()
+    }
   }
 
   private async ensureModelDir() {
@@ -285,22 +294,21 @@ export class SelfLearningEngine extends EventEmitter {
   }
 
   private async build(): Promise<void> {
-    const model = tf.sequential()
-    model.add(tf.layers.dense({ units: 32, inputShape: [this.cfg.stateSize], activation: 'relu' }))
-    model.add(tf.layers.dense({ units: 16, activation: 'relu' }))
-    model.add(tf.layers.dense({ units: this.cfg.actionSize }))
-    const opt = tf.train.adam(this.cfg.learningRate)
-    model.compile({ optimizer: opt, loss: 'meanSquaredError' })
+    const model = buildPolicyModel(this.policyArchitectureId, {
+      stateSize: this.cfg.stateSize,
+      actionSize: this.cfg.actionSize,
+      learningRate: this.cfg.learningRate,
+    })
     this.model = model
     await this.buildTargetFromModel()
   }
 
   private async buildTargetFromModel() {
-    const target = tf.sequential()
-    target.add(tf.layers.dense({ units: 32, inputShape: [this.cfg.stateSize], activation: 'relu' }))
-    target.add(tf.layers.dense({ units: 16, activation: 'relu' }))
-    target.add(tf.layers.dense({ units: this.cfg.actionSize }))
-    target.compile({ optimizer: tf.train.adam(this.cfg.learningRate), loss: 'meanSquaredError' })
+    const target = buildPolicyModel(this.policyArchitectureId, {
+      stateSize: this.cfg.stateSize,
+      actionSize: this.cfg.actionSize,
+      learningRate: this.cfg.learningRate,
+    })
 
     // Copy weights from model if exists
     if (this.model) {
@@ -317,7 +325,7 @@ export class SelfLearningEngine extends EventEmitter {
     this.targetModel.setWeights(w.map(v => v.clone()))
   }
 
-  private toTensor(state: number[] | Float32Array): tf.Tensor2D {
+  private toTensor(state: number[] | Float32Array): any {
     const arr = this.ensureFloat32(state)
     return tf.tensor2d([Array.from(arr)], [1, this.cfg.stateSize])
   }
@@ -334,6 +342,13 @@ export class SelfLearningEngine extends EventEmitter {
     const nx = this.ensureFloat32(exp.nextState)
     this.memory.add({ state: st, actionIndex: exp.actionIndex, reward: exp.reward, nextState: nx, done: exp.done })
     void logExperience({ state: Array.from(st), actionIndex: exp.actionIndex, reward: exp.reward, nextState: Array.from(nx), done: exp.done }).catch(() => {})
+  }
+
+  getPolicyArchitecture() {
+    return {
+      id: this.policyArchitectureId,
+      available: listPolicyArchitectures()
+    }
   }
 }
 

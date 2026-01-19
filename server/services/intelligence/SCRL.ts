@@ -2,6 +2,8 @@ import { prisma } from '../../utils/prisma'
 import { selfLearningEngine } from '../ai/selfLearning/Engine'
 import { alignmentModel } from '../ai/selfLearning/Alignment'
 import { ethics } from './Ethics'
+import { retryPolicy } from '../automation/RetryPolicy'
+import { stealthPolicy } from '../automation/StealthPolicy'
 
 export type ExecutionReview = {
   id: string
@@ -32,6 +34,31 @@ export class SCRL {
     try { ethicsActual = ethics.scanText(JSON.stringify(actual || {})) } catch {}
 
     const review: ExecutionReview = { id, planId, taskId, planned, actual: { ...actual, ethics: ethicsActual }, success, timestamp, reflection, adjustments }
+
+    // Rule injection: if failed with 429 or CAPTCHA, add retry/delay rule and update stealth blacklist
+    try {
+      const action = planned?.action
+      const urlStr = action?.payload?.url ? String(action.payload.url) : null
+      const host = urlStr ? (new URL(urlStr)).hostname.toLowerCase() : null
+      const status = Number((actual as any)?.status || 0)
+      const err = String((actual as any)?.error || '')
+      if (!success && (status === 429 || err === 'captcha_detected')) {
+        if (host) {
+          if (status === 429) {
+            try { stealthPolicy.record429(host) } catch {}
+            try {
+              retryPolicy.add({ scope: 'domain', pattern: host, randomizedDelayMs: [500, 3000], retry: { max: 2, backoffMs: 5000, jitter: 0.5 }, ttlMs: 10 * 60 * 1000 })
+            } catch {}
+          }
+          if (err === 'captcha_detected') {
+            try { stealthPolicy.recordCaptcha(host) } catch {}
+            try {
+              retryPolicy.add({ scope: 'domain', pattern: host, randomizedDelayMs: [5000, 30000], retry: { max: 2, backoffMs: 10000, jitter: 0.3 }, ttlMs: 6 * 60 * 60 * 1000 })
+            } catch {}
+          }
+        }
+      }
+    } catch {}
 
     // Log to database
     try {

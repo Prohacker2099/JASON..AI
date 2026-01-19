@@ -1,5 +1,6 @@
 import winston from 'winston';
 import path from 'path';
+import fs from 'fs';
 
 // Enhanced logging configuration with multiple transports and levels
 const logFormat = winston.format.combine(
@@ -20,6 +21,12 @@ const consoleFormat = winston.format.combine(
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(process.cwd(), 'logs');
+try {
+  fs.mkdirSync(logsDir, { recursive: true });
+} catch (error) {
+  // eslint-disable-next-line no-console
+  console.warn('Could not create logs directory:', error);
+}
 
 const winstonLogger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -143,12 +150,5 @@ export const logger = {
     return winstonLogger.child(context);
   }
 };
-
-// Ensure logs directory exists
-try {
-  require('fs').mkdirSync(logsDir, { recursive: true });
-} catch (error) {
-  console.warn('Could not create logs directory:', error);
-}
 
 export default logger;

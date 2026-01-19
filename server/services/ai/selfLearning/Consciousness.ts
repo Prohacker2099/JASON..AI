@@ -4,6 +4,7 @@ import { selfLearningEngine } from './Engine'
 import { daiSandbox } from '../../execution/DAI'
 import { scrl } from '../../intelligence/SCRL'
 import { sseBroker } from '../../websocket-service'
+import { publishEmotion } from '../../bus/Percepts'
 import fs from 'fs'
 import path from 'path'
 
@@ -45,6 +46,7 @@ class Consciousness extends EventEmitter {
       lastThoughtAt: this.lastThoughtAt ? new Date(this.lastThoughtAt).toISOString() : null,
       workingMemory: { observations: this.observations.slice(-10), thoughts: this.thoughts.slice(-10) }
     }
+  }
 
   private underBudget(): boolean {
     try {
@@ -63,8 +65,8 @@ class Consciousness extends EventEmitter {
     this.intervalMs = Math.max(500, Math.min(10000, Number(opts.intervalMs ?? this.intervalMs)))
     this.running = true
     this.ticks = 0
-    this.sessionId = `con_${Date.now()}_${Math.random().toString(36).slice(2,7)}`
-    this.timer = setInterval(() => { void this.cycle().catch(() => {}) }, this.intervalMs)
+    this.sessionId = `con_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+    this.timer = setInterval(() => { void this.cycle().catch(() => { }) }, this.intervalMs)
     return this.status()
   }
 
@@ -122,17 +124,30 @@ class Consciousness extends EventEmitter {
     const text = obs
       ? `I notice: ${obs.text}. Mood is ${mood}. Next, I will ${intent}.`
       : `Scanning context. Mood is ${mood}. I will ${intent}.`
-    const th: Thought = { id: `th_${now}_${Math.random().toString(36).slice(2,5)}`, text, mood, intent, t: now }
+    const th: Thought = { id: `th_${now}_${Math.random().toString(36).slice(2, 5)}`, text, mood, intent, t: now }
     this.thoughts.push(th)
     if (this.thoughts.length > 200) this.thoughts = this.thoughts.slice(-200)
+    try {
+      const label = mood === 'cautious' ? 'frustrated' : mood === 'optimistic' ? 'calm' : 'neutral'
+      publishEmotion({ label, confidence: 0.7, derivedFrom: 'observations' })
+    } catch { }
     return th
   }
 
   private candidateActionsFromThought(th: Thought) {
-    // Minimal safe actions; default to writing a note; optional GET to weather.gov for reading comprehension
     const actions = [
-      { type: 'file', name: 'note_thought', payload: { path: `data/notes/${this.sessionId || 'con'}.log`, op: 'append', content: `[${new Date(th.t).toISOString()}] ${th.text}\n` }, riskLevel: 0.1, tags: ['log','safe'] },
-      { type: 'http', name: 'fetch_weather_demo', payload: { method: 'GET', url: 'https://api.weather.gov/', headers: {} }, riskLevel: 0.1, tags: ['read','safe'] },
+      { type: 'file', name: 'note_thought', payload: { path: `data/notes/${this.sessionId || 'con'}.log`, op: 'append', content: `[${new Date(th.t).toISOString()}] ${th.text}\n` }, riskLevel: 0.1, tags: ['log', 'safe'] },
+      {
+        type: 'ui',
+        name: 'ui.vlm.describe_screen',
+        payload: {
+          op: 'vlm.describe_screen',
+          desktopName: 'JASON_Workspace',
+          prompt: `Context: ${th.text}. What do you see on the screen that is relevant to ${this.goal}?`
+        },
+        riskLevel: 0.2,
+        tags: ['vision', 'safe']
+      }
     ] as any[]
     return actions
   }
@@ -144,10 +159,10 @@ class Consciousness extends EventEmitter {
     this.lastThoughtAt = th.t
 
     // Decision using SelfLearningEngine, but execute via DAI for ethics/guardrails
-    try { fs.mkdirSync(path.join(process.cwd(), 'data', 'notes'), { recursive: true }) } catch {}
+    try { fs.mkdirSync(path.join(process.cwd(), 'data', 'notes'), { recursive: true }) } catch { }
     const actions = this.candidateActionsFromThought(th)
     const state = this.buildState()
-    try { await selfLearningEngine.initializeIfNeeded(state.length, actions.length) } catch {}
+    try { await selfLearningEngine.initializeIfNeeded(state.length, actions.length) } catch { }
     const { actionIndex, qValues } = await selfLearningEngine.decide(state, actions, true)
     const chosen = actions[actionIndex]
 
@@ -156,17 +171,17 @@ class Consciousness extends EventEmitter {
 
     const actual = { ok: exec.ok, result: exec.result, error: exec.error }
     const success = !!exec.ok
-    try { await scrl.reviewExecution(this.sessionId || 'con', String(this.ticks), planned, actual, success) } catch {}
-    try { await prisma.learningEvent.create({ data: { event: 'consciousness_log', data: { planned, actual, success } as any } }) } catch {}
+    try { await scrl.reviewExecution(this.sessionId || 'con', String(this.ticks), planned, actual, success) } catch { }
+    try { await prisma.learningEvent.create({ data: { event: 'consciousness_log', data: { planned, actual, success } as any } }) } catch { }
 
     // Ingest simplified experience for continued learning
-    try { selfLearningEngine.ingestExperience({ state: state as any, actionIndex, reward: success ? 0.1 : -0.05, nextState: state as any, done: false }) } catch {}
+    try { selfLearningEngine.ingestExperience({ state: state as any, actionIndex, reward: success ? 0.1 : -0.05, nextState: state as any, done: false }) } catch { }
     if (this.underBudget()) {
-      try { void selfLearningEngine.trainStep(1).catch(() => {}) } catch {}
+      try { void selfLearningEngine.trainStep(1).catch(() => { }) } catch { }
     }
 
     // Broadcast via SSE
-    try { sseBroker.broadcast('ai:conscious:thought', { thought: th, chosen, success, simulate: this.simulate }) } catch {}
+    try { sseBroker.broadcast('ai:conscious:thought', { thought: th, chosen, success, simulate: this.simulate }) } catch { }
   }
 }
 

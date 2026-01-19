@@ -111,7 +111,7 @@ export class MarketDataScraper extends EventEmitter {
             });
           }
 
-          await page.waitForTimeout(1000); // Rate limiting
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Rate limiting
         } catch (error) {
           logger.error(`Failed to scrape ${symbol}:`, error);
         }
@@ -172,7 +172,7 @@ export class MarketDataScraper extends EventEmitter {
             });
           }
 
-          await page.waitForTimeout(1000); // Rate limiting
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Rate limiting
         } catch (error) {
           logger.error(`Failed to scrape ${symbol}:`, error);
         }
@@ -319,7 +319,7 @@ export class MarketDataScraper extends EventEmitter {
             rates[currency] = rate;
           }
 
-          await page.waitForTimeout(500);
+          await new Promise(resolve => setTimeout(resolve, 500));
         } catch (error) {
           logger.error(`Failed to get rate for ${currency}:`, error);
         }

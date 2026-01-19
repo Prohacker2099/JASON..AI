@@ -21,6 +21,7 @@ export const EnergyPolicySchema = z.object({
   // Per-zone targets
   zones: z
     .record(
+      z.string(),
       z.object({
         maxBrightness: z.number().min(0).max(100).optional(),
         turnOffIdlePlugs: z.boolean().optional(),

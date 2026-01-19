@@ -245,9 +245,49 @@ export class EverythingContextManager extends EventEmitter {
   }
 
   private startContextUpdateLoop(): void {
+    const interval = typeof (this as any).config?.updateInterval === 'number' ? (this as any).config.updateInterval : 1000;
     this.updateInterval = setInterval(() => {
       this.performContextUpdate();
-    }, this.config.updateInterval);
+    }, interval);
+  }
+
+  public async isHealthy(): Promise<boolean> {
+    return this.isActive;
+  }
+
+  public async shutdown(): Promise<void> {
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
+    }
+    this.isActive = false;
+  }
+
+  public async analyzeContext(goal: string, context?: any): Promise<ContextAnalysis> {
+    const relevantDomains = ['personal','calendar','financial','academic']
+    const keyContextNodes = Array.from(this.temporalContextGraph.nodes.values()).slice(0, 3)
+    const temporalContext = {
+      recent: keyContextNodes,
+      relevant: keyContextNodes,
+      critical: keyContextNodes.filter(n => n.criticality > 0.8)
+    }
+    const analysis: ContextAnalysis = {
+      goal,
+      relevantDomains,
+      keyContextNodes,
+      crossDomainLinks: Array.from(this.crossDomainLinks.values()),
+      temporalContext,
+      confidence: 0.7,
+      completeness: 0.6,
+      analysisTimestamp: new Date()
+    }
+    this.emit('contextAnalyzed', analysis)
+    return analysis
+  }
+
+  private performContextUpdate(): void {
+    this.temporalContextGraph.lastUpdated = new Date()
+    this.emit('contextUpdate', { lastUpdated: this.temporalContextGraph.lastUpdated })
   }
 
   private async performContextUpdate(): Promise<void> {

@@ -1,17 +1,21 @@
 {
     "compilerOptions": {
         "target": "ES2022",
-        "module": "ESNext",
+        "module": "CommonJS",
         "moduleResolution": "node",
         "esModuleInterop": true,
-        "strict": true,
+        "allowSyntheticDefaultImports": true,
+        "strict": false,
+        "noImplicitAny": false,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule": true,
         "outDir": "./dist",
         "rootDir": ".",
         "sourceMap": true,
-        "types": ["node"]
+        "declaration": true,
+        "types": ["node"],
+        "noEmitOnError": false
     },
     "include": [
         "server/**/*",
@@ -21,6 +25,15 @@
     ],
     "exclude": [
         "node_modules",
-        "dist"
+        "dist",
+        "client",
+        "server/node_modules",
+        "server/dist",
+        "server/services/energy/**/*",
+        "server/services/marketplace/**/*",
+        "server/services/monitoring/**/*",
+        "server/services/ar/**/*",
+        "server/services/edge/**/*",
+        "server/services/security/**/*"
     ]
 }

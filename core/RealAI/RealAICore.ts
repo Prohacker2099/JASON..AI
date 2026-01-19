@@ -699,6 +699,16 @@ export class RealAICore extends EventEmitter {
     return this.knowledgeBase.get(key);
   }
 
+  public async ingestExternalKnowledge(source: string, content: string, context?: any): Promise<void> {
+    const payload = {
+      source,
+      content,
+      ...(context || {})
+    };
+    await this.addKnowledge(source, payload);
+    await this.createMemory('knowledge', content.substring(0, 1000), { type: 'web', source, ...(context || {}) });
+  }
+
   public async updateConfig(newConfig: Partial<RealAIConfig>): Promise<void> {
     this.config = { ...this.config, ...newConfig };
     logger.info('Real AI Core config updated:', newConfig);

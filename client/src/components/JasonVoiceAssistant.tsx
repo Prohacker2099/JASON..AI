@@ -13,7 +13,7 @@ interface JasonVoiceAssistantProps {
 }
 
 const JasonVoiceAssistant: React.FC<JasonVoiceAssistantProps> = () => {
-  const { devices, updateDeviceState } = useSmartHomeContext();
+  const { updateDeviceState } = useSmartHomeContext();
   const { triggerHapticFeedback } = useHapticFeedback();
   const { playSound, stopSound } = useAmbientSound();
 
@@ -99,14 +99,11 @@ const JasonVoiceAssistant: React.FC<JasonVoiceAssistantProps> = () => {
   const processVoiceCommand = useCallback(async (command: string) => {
     try {
       const nluResponse = await voiceService.processCommand(command);
-      setResponse(nluResponse.response);
-      await speakResponse(nluResponse.response);
-
-      if (nluResponse.intent && nluResponse.entities) {
-        if (nluResponse.intent === 'control_lights' && nluResponse.entities.device_id && nluResponse.entities.status) {
-          updateDeviceState({ deviceId: nluResponse.entities.device_id, newState: { on: nluResponse.entities.status === 'on' } });
-        }
-      }
+      const reply = (nluResponse && typeof (nluResponse as any).reply === 'string')
+        ? String((nluResponse as any).reply)
+        : 'Okay.';
+      setResponse(reply);
+      await speakResponse(reply);
 
       setIsProcessing(false);
       stopSound();

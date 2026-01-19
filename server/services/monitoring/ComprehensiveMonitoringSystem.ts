@@ -247,10 +247,21 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
 
   private async getDiskInfo(): Promise<SystemMetrics['disk']> {
     try {
-      const stats = await fs.promises.statvfs?.(process.cwd()) || 
+      const stats = await fs.promises.statfs?.(process.cwd()) || 
                    await this.getDiskInfoFallback();
       
-      return stats;
+      // Convert StatsFs to expected format
+      if ('total' in stats) {
+        return stats as SystemMetrics['disk'];
+      } else {
+        // Handle StatsFs conversion
+        const fsStats = stats as any;
+        const total = fsStats.blocks * fsStats.bsize;
+        const free = fsStats.bfree * fsStats.bsize;
+        const used = total - free;
+        const usage = (used / total) * 100;
+        return { total, used, free, usage };
+      }
     } catch (error) {
       return { total: 0, used: 0, free: 0, usage: 0 };
     }

@@ -2,11 +2,11 @@ import { EventEmitter } from 'events';
 import { logger } from '../../utils/logger';
 import { databaseManager } from '../../utils/database';
 import { cacheManager } from '../../utils/cache';
-import * as tf from '@tensorflow/tfjs-node';
+import tf from './tf';
 
 // Advanced AI-powered predictive analytics engine
 export class PredictiveAnalytics extends EventEmitter {
-  private models: Map<string, tf.LayersModel> = new Map();
+  private models: Map<string, any> = new Map();
   private trainingData: Map<string, any[]> = new Map();
   private predictions: Map<string, any> = new Map();
   private isTraining = false;
@@ -95,13 +95,13 @@ export class PredictiveAnalytics extends EventEmitter {
       const features = this.prepareEnergyFeatures(historicalData);
       const inputTensor = tf.tensor2d([features]);
       
-      const prediction = model.predict(inputTensor) as tf.Tensor;
+      const prediction = model.predict(inputTensor) as any;
       const result = await prediction.data();
       
       inputTensor.dispose();
       prediction.dispose();
 
-      const predictions = Array.from(result);
+      const predictions = Array.from(result).map((v: any) => Number(v)) as number[];
       
       // Cache prediction
       await cacheManager.energy.setUsageHistory(deviceId, 'prediction_24h', predictions);
@@ -126,7 +126,7 @@ export class PredictiveAnalytics extends EventEmitter {
       const features = this.prepareDeviceFailureFeatures(deviceMetrics);
       const inputTensor = tf.tensor2d([features]);
       
-      const prediction = model.predict(inputTensor) as tf.Tensor;
+      const prediction = model.predict(inputTensor) as any;
       const result = await prediction.data();
       
       inputTensor.dispose();
@@ -158,7 +158,7 @@ export class PredictiveAnalytics extends EventEmitter {
       const features = this.prepareBehaviorFeatures(recentActions);
       const inputTensor = tf.tensor3d([features]);
       
-      const prediction = model.predict(inputTensor) as tf.Tensor;
+      const prediction = model.predict(inputTensor) as any;
       const result = await prediction.data();
       
       inputTensor.dispose();

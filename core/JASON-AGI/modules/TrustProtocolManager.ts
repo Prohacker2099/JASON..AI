@@ -172,7 +172,7 @@ export class TrustProtocolManager extends EventEmitter {
     
     // Check if permission is enabled
     if (!this.isPermissionLevelEnabled(requiredLevel)) {
-      return { approved: false, reason: `Level ${requiredLevel} permissions not enabled` };
+      return { approved: false, reason: `Level ${requiredLevel} permissions not enabled`, requiredLevel };
     }
     
     // Handle different permission levels
@@ -228,9 +228,9 @@ export class TrustProtocolManager extends EventEmitter {
 
   private isPermissionLevelEnabled(level: number): boolean {
     switch (level) {
-      case 1: return this.config.enableLevel1Permissions;
-      case 2: return this.config.enableLevel2Permissions;
-      case 3: return this.config.enableLevel3Permissions;
+      case 1: return this.config.enableLevel1Permissions ?? true;
+      case 2: return this.config.enableLevel2Permissions ?? true;
+      case 3: return this.config.enableLevel3Permissions ?? false;
       default: return false;
     }
   }
@@ -252,6 +252,22 @@ export class TrustProtocolManager extends EventEmitter {
     this.emit('level2Notification', request);
     
     return { approved: true, requiredLevel: 2 };
+  }
+
+  public async updateTrustLevel(score: number): Promise<void> {
+    this.trustLevel.score = Math.max(0, Math.min(1, score));
+    this.trustLevel.level = this.trustLevel.score >= 0.8 ? 'maximum' : this.trustLevel.score >= 0.6 ? 'high' : this.trustLevel.score >= 0.4 ? 'medium' : 'low';
+    this.trustLevel.lastUpdated = new Date();
+    this.emit('trustLevelUpdated', this.trustLevel);
+    logger.info('Trust level updated', { score: this.trustLevel.score, level: this.trustLevel.level });
+  }
+
+  public async isHealthy(): Promise<boolean> {
+    return true;
+  }
+
+  public async shutdown(): Promise<void> {
+    this.isActive = false;
   }
 
   private async handleLevel3Permission(executionPlan: any): Promise<{ approved: boolean; reason?: string; requiredLevel?: number }> {

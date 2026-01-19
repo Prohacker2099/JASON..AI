@@ -282,7 +282,12 @@ export class JASONCoreAIEngine extends EventEmitter {
       const permissionCheck = await this.trustProtocolManager.checkPermissions(executionPlan);
       
       if (!permissionCheck.approved) {
-        await this.jasonEyeInterface.updateStatus('blocked', `Permission required: ${permissionCheck.reason}`);
+        if (permissionCheck.requiredLevel === 3) {
+          await this.jasonEyeInterface.updateStatus('blocked', `Permission required: ${permissionCheck.reason}`);
+          await this.digitalAgentInterface.exposeForReview();
+        } else {
+          await this.jasonEyeInterface.updateStatus('blocked', `Permission required: ${permissionCheck.reason}`);
+        }
         return `Task execution blocked: ${permissionCheck.reason}`;
       }
 

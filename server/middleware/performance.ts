@@ -1,7 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { logger } from '../utils/logger';
 import os from 'os';
 import { performance } from 'perf_hooks';
+
+type NextFunction = (err?: any) => void;
 
 // Performance monitoring middleware
 export class PerformanceMonitor {

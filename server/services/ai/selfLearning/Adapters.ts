@@ -3,7 +3,7 @@ import { spawn } from 'child_process'
 import { promises as fs } from 'fs'
 
 export type ActionDefinition = {
-  type: 'http' | 'process' | 'device' | 'file' | 'powershell' | 'app'
+  type: 'http' | 'process' | 'device' | 'file' | 'powershell' | 'app' | 'web' | 'connector' | 'ui'
   name?: string
   payload?: any
   riskLevel?: number
@@ -106,6 +106,14 @@ export class FileAdapter implements ActionAdapter {
       if (op === 'append') {
         await fs.appendFile(p, String(a.payload.content ?? ''), enc as any)
         return { ok: true, result: true }
+      }
+      if (op === 'delete') {
+        try {
+          await fs.unlink(p)
+          return { ok: true, result: true }
+        } catch {
+          return { ok: false, error: 'delete_failed' }
+        }
       }
       if (op === 'exists') {
         try { await fs.access(p); return { ok: true, result: true } } catch { return { ok: true, result: false } }

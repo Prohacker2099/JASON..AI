@@ -130,3 +130,4 @@ nginx/ssl/
 *.crt
 *.db
 prisma/dev.db
+__trash__/

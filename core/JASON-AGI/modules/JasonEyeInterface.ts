@@ -5,8 +5,8 @@ import { EventEmitter } from 'events';
 import { logger } from '../../../server/src/utils/logger';
 
 export interface JasonEyeStatus {
-  color: 'blue' | 'green' | 'yellow' | 'red';
-  state: 'monitoring' | 'working' | 'waiting' | 'error' | 'blocked';
+  color: 'blue' | 'green' | 'yellow' | 'red' | 'orange';
+  state: 'monitoring' | 'working' | 'waiting' | 'error' | 'blocked' | 'planning' | 'completed' | 'failed' | 'warning';
   message: string;
   progress?: number;
   timestamp: Date;
@@ -94,9 +94,10 @@ export class JasonEyeInterface extends EventEmitter {
   }
 
   private startUpdateLoop(): void {
+    const interval = typeof this.config.updateInterval === 'number' ? this.config.updateInterval : 1000;
     this.updateInterval = setInterval(() => {
       this.updateInterface();
-    }, this.config.updateInterval);
+    }, interval);
   }
 
   private updateInterface(): void {
@@ -119,7 +120,7 @@ export class JasonEyeInterface extends EventEmitter {
     const waitingActivities = this.activityFeed.filter(entry => entry.status === 'paused');
 
     if (failedActivities.length > 0) {
-      this.updateStatus('error', `Error: ${failedActivities[0].activity}`);
+      this.updateStatus('failed', `Failed: ${failedActivities[0].activity}`);
     } else if (waitingActivities.length > 0) {
       this.updateStatus('waiting', `Waiting: ${waitingActivities[0].activity}`);
     } else if (activeActivities.length > 0) {
@@ -143,7 +144,11 @@ export class JasonEyeInterface extends EventEmitter {
       'working': 'green',
       'waiting': 'yellow',
       'error': 'red',
-      'blocked': 'red'
+      'blocked': 'red',
+      'planning': 'blue',
+      'completed': 'green',
+      'failed': 'red',
+      'warning': 'orange'
     };
 
     this.currentStatus = {
@@ -158,7 +163,7 @@ export class JasonEyeInterface extends EventEmitter {
     logger.info('Jason Eye status updated:', { state, message, progress });
   }
 
-  public addActivity(activity: string, domain: string, status: ActivityFeedEntry['status'], details?: string): void {
+  public addActivity(activity: string, domain: string = 'system', status: ActivityFeedEntry['status'] = 'in_progress', details?: string): void {
     const entry: ActivityFeedEntry = {
       id: `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date(),
@@ -246,6 +251,22 @@ export class JasonEyeInterface extends EventEmitter {
 
   public getCurrentStatus(): JasonEyeStatus {
     return { ...this.currentStatus };
+  }
+
+  public getActiveTaskCount(): number {
+    return this.activeTasks.size;
+  }
+
+  public async isHealthy(): Promise<boolean> {
+    return this.isActive;
+  }
+
+  public async shutdown(): Promise<void> {
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
+    }
+    this.isActive = false;
   }
 
   public getActivityFeed(): ActivityFeedEntry[] {

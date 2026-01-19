@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import * as bcrypt from 'bcrypt';
+const bcrypt = require('bcrypt');
 import { logger } from '../../utils/logger';
 import { prisma } from '../../utils/prisma';
 

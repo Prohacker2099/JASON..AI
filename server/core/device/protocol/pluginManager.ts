@@ -1,7 +1,7 @@
 // server/core/device/protocol/pluginManager.ts
 
-import { ProtocolBridge } from './ProtocolBridge.js';
-import { logger } from '../../../utils/logger.js';
+import { ProtocolBridge } from './ProtocolBridge';
+import { logger } from '../../../utils/logger';
 
 export class PluginManager {
   private bridges: Map<string, ProtocolBridge>;

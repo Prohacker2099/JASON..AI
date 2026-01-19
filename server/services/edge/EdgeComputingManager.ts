@@ -113,7 +113,7 @@ export class EdgeComputingManager extends EventEmitter {
       const results = await Promise.all(promises);
       
       // Flatten and merge results
-      const flatResults = results.flat();
+      const flatResults = results.flat() as T[];
       
       this.emit('computationCompleted', { taskId, results: flatResults.length });
       logger.info('Distributed computation completed', { taskId, nodes: nodeAssignments.length });

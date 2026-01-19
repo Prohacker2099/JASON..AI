@@ -1,0 +1,55 @@
+{
+  "result": "ok:sub_1763415254731",
+  "perf": {
+    "durationMs": 68,
+    "rssMB": -1,
+    "heapUsedMB": 0
+  },
+  "blocked": "Task execution blocked: Level 3 permissions not enabled",
+  "logs": [
+    {
+      "event": "initialized",
+      "at": 1763415254729
+    },
+    {
+      "event": "statusUpdated",
+      "data": {
+        "color": "blue",
+        "state": "planning",
+        "message": "Planning: Plan weekly focus tasks",
+        "timestamp": "2025-11-17T21:34:14.730Z"
+      },
+      "at": 1763415254730
+    },
+    {
+      "event": "statusUpdated",
+      "data": {
+        "color": "green",
+        "state": "completed",
+        "message": "Task completed: Plan weekly focus tasks",
+        "timestamp": "2025-11-17T21:34:14.797Z"
+      },
+      "at": 1763415254798
+    },
+    {
+      "event": "statusUpdated",
+      "data": {
+        "color": "blue",
+        "state": "planning",
+        "message": "Planning: Purchase flight tickets for Monday morning",
+        "timestamp": "2025-11-17T21:34:14.799Z"
+      },
+      "at": 1763415254799
+    },
+    {
+      "event": "statusUpdated",
+      "data": {
+        "color": "red",
+        "state": "blocked",
+        "message": "Permission required: Level 3 permissions not enabled",
+        "timestamp": "2025-11-17T21:34:14.799Z"
+      },
+      "at": 1763415254799
+    }
+  ]
+}

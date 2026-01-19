@@ -1,16 +1,22 @@
 import { EventEmitter } from 'events';
 import { logger } from '../../utils/logger';
-import * as THREE from 'three';
-import { WebXRManager } from 'three/examples/jsm/webxr/WebXRManager';
+
+// Type declarations to avoid THREE namespace errors
+declare const THREE: any;
+declare const WebXRManager: any;
+
+// Initialize THREE modules
+const THREE = require('three');
+const { WebXRManager } = require('three/examples/jsm/webxr/WebXRManager');
 
 // Advanced Augmented Reality interface for immersive device control
 export class AugmentedRealityInterface extends EventEmitter {
-  private scene: THREE.Scene;
-  private camera: THREE.PerspectiveCamera;
-  private renderer: THREE.WebGLRenderer;
-  private xrManager: WebXRManager;
+  private scene: any;
+  private camera: any;
+  private renderer: any;
+  private xrManager: any;
   private arObjects: Map<string, ARDeviceObject> = new Map();
-  private spatialAnchors: Map<string, THREE.Vector3> = new Map();
+  private spatialAnchors: Map<string, any> = new Map();
   private gestureRecognizer: GestureRecognizer;
   private voiceCommands: VoiceCommandProcessor;
   private isARActive = false;
@@ -52,13 +58,17 @@ export class AugmentedRealityInterface extends EventEmitter {
   }
 
   // Start AR session
-  async startARSession(): Promise<void> {
+  async initializeAR(): Promise<void> {
     try {
-      if (!navigator.xr) {
-        throw new Error('WebXR not supported');
+      // Check WebXR support
+      const nav: any = navigator;
+      if (!nav.xr) {
+        logger.warn('WebXR not supported, falling back to WebVR');
+        return;
       }
 
-      const session = await navigator.xr.requestSession('immersive-ar', {
+      // Request AR session
+      const session = await nav.xr.requestSession('immersive-ar', {
         requiredFeatures: ['local', 'hit-test', 'dom-overlay'],
         optionalFeatures: ['hand-tracking', 'eye-tracking']
       });
@@ -79,7 +89,7 @@ export class AugmentedRealityInterface extends EventEmitter {
   }
 
   // Create 3D representation of IoT device in AR space
-  async createARDevice(deviceId: string, deviceType: string, position: THREE.Vector3): Promise<void> {
+  async createARDevice(deviceId: string, deviceType: string, position: any): Promise<void> {
     const arObject = new ARDeviceObject(deviceId, deviceType);
     await arObject.load();
     
@@ -161,7 +171,7 @@ export class AugmentedRealityInterface extends EventEmitter {
   }
 
   // Create AR waypoints for device locations
-  createWaypoint(name: string, position: THREE.Vector3, deviceIds: string[]): void {
+  createWaypoint(name: string, position: any, deviceIds: string[]): void {
     const waypoint = new ARWaypoint(name, deviceIds);
     waypoint.mesh.position.copy(position);
     
@@ -341,10 +351,10 @@ export class AugmentedRealityInterface extends EventEmitter {
 }
 
 // AR Device Object representation
-class ARDeviceObject {
-  public mesh: THREE.Group;
+export class ARDeviceObject {
+  public mesh: any;
   private infoPanel?: ARInfoPanel;
-  private animations: THREE.AnimationMixer;
+  private animations: any;
 
   constructor(public deviceId: string, public deviceType: string) {
     this.mesh = new THREE.Group();
@@ -364,7 +374,7 @@ class ARDeviceObject {
     this.addGlowEffect();
   }
 
-  private createDeviceGeometry(): THREE.BufferGeometry {
+  private createDeviceGeometry(): any {
     switch (this.deviceType) {
       case 'light':
         return new THREE.SphereGeometry(0.05, 16, 16);
@@ -377,7 +387,7 @@ class ARDeviceObject {
     }
   }
 
-  private createDeviceMaterial(): THREE.Material {
+  private createDeviceMaterial(): any {
     return new THREE.MeshPhongMaterial({
       color: this.getDeviceColor(),
       transparent: true,
@@ -428,8 +438,8 @@ class ARDeviceObject {
 
   updateState(state: any): void {
     // Update visual representation based on device state
-    const deviceMesh = this.mesh.children[0] as THREE.Mesh;
-    const material = deviceMesh.material as THREE.MeshPhongMaterial;
+    const deviceMesh = this.mesh.children[0] as any;
+    const material = deviceMesh.material as any;
 
     if (state.isOn !== undefined) {
       material.opacity = state.isOn ? 1.0 : 0.5;
@@ -468,8 +478,8 @@ class ARDeviceObject {
     this.animations.update(0.016); // 60 FPS
     
     // Update glow effect
-    const glowMesh = this.mesh.children[1] as THREE.Mesh;
-    if (glowMesh && glowMesh.material instanceof THREE.ShaderMaterial) {
+    const glowMesh = this.mesh.children[1] as any;
+    if (glowMesh && glowMesh.material && glowMesh.material.uniforms) {
       glowMesh.material.uniforms.time.value = Date.now() * 0.001;
     }
   }
@@ -478,7 +488,7 @@ class ARDeviceObject {
     this.animations.stopAllAction();
     
     this.mesh.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
+      if (child && child.material) {
         child.geometry.dispose();
         if (Array.isArray(child.material)) {
           child.material.forEach(material => material.dispose());
@@ -492,10 +502,12 @@ class ARDeviceObject {
 
 // AR Information Panel
 class ARInfoPanel {
-  public mesh: THREE.Group;
+  public mesh: any;
+  public position: any;
 
   constructor(private info: any) {
     this.mesh = new THREE.Group();
+    this.position = new THREE.Vector3();
     this.createPanel();
   }
 
@@ -529,7 +541,7 @@ class ARInfoPanel {
 
 // AR Waypoint
 class ARWaypoint {
-  public mesh: THREE.Group;
+  public mesh: any;
 
   constructor(public name: string, public deviceIds: string[]) {
     this.mesh = new THREE.Group();
@@ -619,7 +631,7 @@ class CollaborativeARSpace extends EventEmitter {
 
 // AR User Avatar
 class ARUserAvatar {
-  public mesh: THREE.Group;
+  public mesh: any;
 
   constructor(public userId: string, public userName: string) {
     this.mesh = new THREE.Group();
@@ -639,7 +651,7 @@ class ARUserAvatar {
 // Type definitions
 interface HandGesture {
   type: 'point' | 'grab' | 'swipe';
-  position: THREE.Vector2;
+  position: any;
   direction?: string;
 }
 

@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 import { sseBroker } from '../websocket-service'
+import { publishPolicyEval } from '../bus/Percepts'
 
 export type TrustLevel = 1 | 2 | 3
 
@@ -31,6 +32,15 @@ class PermissionManager extends EventEmitter {
     this.prompts.set(id, prompt)
     sseBroker.broadcast('trust:prompt', prompt)
     this.emit('prompt', prompt)
+    try {
+      publishPolicyEval({
+        subject: { kind: 'action', ref: String(data?.meta?.action?.name || data.title) },
+        decision: 'require_approval',
+        reasons: [String(data.rationale || 'approval_required')],
+        level: data.level,
+        approvalId: id,
+      })
+    } catch {}
     return prompt
   }
 
@@ -44,6 +54,15 @@ class PermissionManager extends EventEmitter {
     this.prompts.delete(id)
     sseBroker.broadcast('trust:decision', { id, decision, meta })
     this.emit('decision', { id, decision, meta })
+    try {
+      publishPolicyEval({
+        subject: { kind: 'action', ref: String(p?.meta?.action?.name || p.title) },
+        decision: decision === 'approve' ? 'approved' : decision === 'reject' ? 'rejected' : 'delayed',
+        reasons: ['user_decision'],
+        level: p.level,
+        approvalId: id,
+      })
+    } catch {}
     const ws = this.waiters.get(id)
     if (ws && ws.length) {
       for (const w of ws) { try { w(decision) } catch {} }

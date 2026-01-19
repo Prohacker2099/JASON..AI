@@ -267,7 +267,7 @@ export class EnergyPriceScraper extends EventEmitter {
       // Enter location
       await page.type('#address', location);
       await page.click('#search-button');
-      await page.waitForTimeout(3000);
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       const solarData = await page.evaluate(() => {
         // Extract solar irradiance and optimal tilt data

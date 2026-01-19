@@ -56,6 +56,26 @@ export const api = {
     const res = await http.post('/devices/uc/sendCommand', { deviceId, command, payload });
     return res.data;
   },
+  async getActivityLogs(limit = 50) {
+    const res = await http.get<{ logs: any[] }>('/activity/logs', { params: { limit } });
+    return res.data;
+  },
+  async getBDIStatus() {
+    const res = await http.get('/bdi/status');
+    return res.data;
+  },
+  async getContextCurrent() {
+    const res = await http.get('/context/current');
+    return res.data;
+  },
+  async getOrchJobs() {
+    const res = await http.get('/orch/jobs');
+    return res.data;
+  },
+  async getStyleProfile(params?: { channel?: string; recipient?: string; taskType?: string }) {
+    const res = await http.get('/ai/style/profile', { params: params || {} });
+    return res.data;
+  },
 };
 
 export default api;

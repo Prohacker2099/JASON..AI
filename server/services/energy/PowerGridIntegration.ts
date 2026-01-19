@@ -1,10 +1,14 @@
-import axios from 'axios';
-import { SerialPort } from 'serialport';
-import { ReadlineParser } from '@serialport/parser-readline';
 import { EventEmitter } from 'events';
-import net from 'net';
-import dgram from 'dgram';
 import { logger } from '../../utils/logger';
+import * as net from 'net';
+const SerialPort = require('serialport');
+const ReadlineParser = require('@serialport/parser-readline');
+
+/**
+ * Mock implementation of PowerGridIntegration
+ * This replaces the hardware-dependent implementation to allow the server to run
+ * without access to physical serial ports and energy monitoring devices
+ */
 
 interface GridReading {
   timestamp: string;
@@ -56,15 +60,14 @@ interface GridConnection {
 }
 
 export class PowerGridIntegration extends EventEmitter {
-  private connections: Map<string, GridConnection> = new Map();
-  private serialPorts: Map<string, SerialPort> = new Map();
-  private tcpClients: Map<string, net.Socket> = new Map();
-  private pollingIntervals: Map<string, NodeJS.Timeout> = new Map();
   private isMonitoring = false;
+  private connections = new Map<string, GridConnection>();
+  private tcpClients = new Map<string, any>();
+  private serialPorts = new Map<string, any>();
+  private pollingIntervals = new Map<string, NodeJS.Timeout>();
 
   constructor() {
     super();
-    this.setupGridConnections();
   }
 
   private setupGridConnections(): void {

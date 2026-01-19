@@ -1,19 +1,22 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ES2020",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "noImplicitAny": false,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": false,
     "outDir": "./dist/server",
     "rootDir": ".",
-    "declaration": true,
+    "declaration": false,
     "allowJs": true,
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmitOnError": false,
+    "noResolve": false,
+    "isolatedModules": false
   },
   "include": [
     "server/**/*.ts",

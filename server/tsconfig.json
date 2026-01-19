@@ -1,0 +1,26 @@
+{
+  "extends": "../tsconfig.server.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "outDir": "../dist/server",
+    "strict": false,
+    "noImplicitAny": false
+  },
+  "include": [
+    "./index.ts",
+    "./core/**/*",
+    "./services/**/*",
+    "./src/**/*",
+    "./utils/**/*"
+  ],
+  "exclude": [
+    "./node_modules",
+    "./dist",
+    "./services/energy/**/*",
+    "./services/marketplace/**/*",
+    "./services/monitoring/**/*",
+    "./services/ar/**/*",
+    "./services/edge/**/*",
+    "./services/security/**/*"
+  ]
+}

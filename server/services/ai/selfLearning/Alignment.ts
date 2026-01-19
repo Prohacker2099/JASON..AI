@@ -1,4 +1,4 @@
-import * as tf from '@tensorflow/tfjs-node'
+import tf from '../tf'
 import fs from 'fs'
 import path from 'path'
 import { ActionDefinition } from './Adapters'
@@ -52,7 +52,7 @@ function writeDataset(samples: AlignmentSample[]) {
 }
 
 export class AlignmentModel {
-  private model: tf.LayersModel | null = null
+  private model: any | null = null
   private featureSize = 1 + ACTION_TYPES.length + VALUE_KEYS.length + 1 // risk + type one-hot + tag groups + tagPosCount
   private lastTrainAt: number | null = null
 
@@ -112,7 +112,7 @@ export class AlignmentModel {
     return feats
   }
 
-  async train(epochs = 15, batchSize = 32): Promise<{ ok: boolean; loss?: number; count: number }> {
+  async train(epochs = 30, batchSize = 32): Promise<{ ok: boolean; loss?: number; count: number }> {
     const samples = readDataset()
     if (samples.length < 20) return { ok: false, count: samples.length }
     await this.ensureModel()
@@ -120,7 +120,7 @@ export class AlignmentModel {
     const X = tf.tensor2d(samples.map(s => s.features), [samples.length, this.featureSize])
     const y = tf.tensor2d(samples.map(s => [Math.max(0, Math.min(1, s.label))]), [samples.length, 1])
 
-    const hist = await (this.model as tf.LayersModel).fit(X, y, {
+    const hist = await (this.model as any).fit(X, y, {
       epochs: Math.max(1, Math.min(epochs, 200)),
       batchSize: Math.max(4, Math.min(batchSize, 512)),
       verbose: 0,
@@ -129,7 +129,7 @@ export class AlignmentModel {
 
     X.dispose(); y.dispose()
     this.lastTrainAt = Date.now()
-    try { await (this.model as tf.LayersModel).save('file://' + MODEL_DIR) } catch {}
+    try { await (this.model as any).save('file://' + MODEL_DIR) } catch {}
     const loss = (hist.history.loss?.[hist.history.loss.length - 1] as number) || undefined
     return { ok: true, loss, count: samples.length }
   }
@@ -138,11 +138,11 @@ export class AlignmentModel {
     if (!this.model) return this.heuristicScore(features)
     try {
       const x = tf.tensor2d([features], [1, this.featureSize])
-      const y = (this.model as tf.LayersModel).predict(x) as tf.Tensor
+      const y = (this.model as any).predict(x) as any
       const v = (y.dataSync() as Float32Array)[0]
       x.dispose(); y.dispose()
       if (!Number.isFinite(v)) return this.heuristicScore(features)
-      return Math.max(0, Math.min(1, Number(v)))
+      return Math.max(0, Math.min(1, v))
     } catch {
       return this.heuristicScore(features)
     }

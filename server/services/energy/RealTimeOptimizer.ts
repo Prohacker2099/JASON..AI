@@ -241,7 +241,8 @@ export class RealTimeOptimizer extends EventEmitter {
         
         // Get max Q value for next state
         const nextStateActions = this.reinforcementModel.qTable.get(nextState) || new Map();
-        const maxNextQ = Math.max(...Array.from(nextStateActions.values()), 0);
+        const nextQValues = Array.from(nextStateActions.values()) as number[];
+        const maxNextQ = nextQValues.length > 0 ? Math.max(...nextQValues) : 0;
         
         // Q-learning update
         const newQ = currentQ + alpha * (reward + gamma * maxNextQ - currentQ);

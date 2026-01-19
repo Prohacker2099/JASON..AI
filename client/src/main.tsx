@@ -9,6 +9,7 @@ import ConsciousPanel from './components/ConsciousPanel';
 import './index.css';
 import AppThemeProvider from './theme/AppThemeProvider';
 import JEye from './components/JEye';
+import TravelReviewPanel from './components/TravelReviewPanel';
 
 const AppRouter: React.FC = () => {
   const [hash, setHash] = useState<string>(window.location.hash);
@@ -33,6 +34,9 @@ const AppRouter: React.FC = () => {
   }
   if (hash === '#/conscious') {
     return <ConsciousPanel />;
+  }
+  if (hash === '#/travel') {
+    return <TravelReviewPanel />;
   }
   return <App />;
 };

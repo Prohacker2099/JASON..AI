@@ -1,4 +1,4 @@
-import * as tf from '@tensorflow/tfjs-node'
+import tf from '../ai/tf'
 import fs from 'fs'
 import path from 'path'
 
@@ -54,7 +54,7 @@ function textFeatures(text: string): number[] {
 }
 
 export class USPT {
-  private model: tf.LayersModel | null = null
+  private model: any | null = null
   private featureSize = 6
   private lastTrainAt: number | null = null
 
@@ -102,7 +102,7 @@ export class USPT {
     const X = tf.tensor2d(samples.map(s => s.features), [samples.length, this.featureSize])
     const y = tf.tensor2d(samples.map(s => s.label), [samples.length, 3])
 
-    const hist = await (this.model as tf.LayersModel).fit(X, y, {
+    const hist = await (this.model as any).fit(X, y, {
       epochs: Math.max(1, Math.min(epochs, 200)),
       batchSize: Math.max(4, Math.min(batchSize, 512)),
       verbose: 0,
@@ -111,7 +111,7 @@ export class USPT {
 
     X.dispose(); y.dispose()
     this.lastTrainAt = Date.now()
-    try { await (this.model as tf.LayersModel).save('file://' + MODEL_DIR) } catch {}
+    try { await (this.model as any).save('file://' + MODEL_DIR) } catch {}
     const loss = (hist.history.loss?.[hist.history.loss.length - 1] as number) || undefined
     return { ok: true, loss, count: samples.length }
   }
@@ -120,7 +120,7 @@ export class USPT {
     if (!this.model) return this.heuristic(features)
     try {
       const x = tf.tensor2d([features.slice(0, this.featureSize)], [1, this.featureSize])
-      const y = (this.model as tf.LayersModel).predict(x) as tf.Tensor
+      const y = (this.model as any).predict(x) as any
       const v = Array.from((y.dataSync() as Float32Array)) as number[]
       x.dispose(); y.dispose()
       const out: [number, number, number] = [Number(v[0]||0.5), Number(v[1]||0.5), Number(v[2]||0.5)]
