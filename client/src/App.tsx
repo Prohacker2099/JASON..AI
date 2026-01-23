@@ -1,8 +1,8 @@
 import React from 'react';
-import UniversalCommandCenter from './components/UniversalCommandCenter';
+import SovereignOS from './components/SovereignOS';
 
 function App() {
-  return <UniversalCommandCenter />;
+  return <SovereignOS />;
 }
 
 export default App;

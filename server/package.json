@@ -29,10 +29,12 @@
   },
   "scripts": {
     "dev": "npx tsx index.ts",
-    "start": "npx tsx index.ts"
+    "start": "npx tsx index.ts",
+    "test": "vitest run"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.9"
   }
 }

@@ -6,7 +6,7 @@ import compression from 'compression'
 import dotenv from 'dotenv'
 import { createServer } from 'http'
 import * as WebSocketModule from 'ws'
-const { WebSocketServer } = WebSocketModule
+const { WebSocketServer } = WebSocketModule as any
 import { z } from 'zod'
 import { logger } from './src/utils/logger'
 import { prisma } from './src/db'
@@ -37,6 +37,7 @@ import { sharedMemoryManager } from './services/memory/SharedMemoryManager'
 import capabilitiesRoutes from './routes/capabilities'
 import agentRoutes from './routes/agent'
 import connectorsRoutes from './routes/connectors'
+import handsRoutes from './routes/hands'
 import { DAISandbox } from './services/execution/DAI'
 import { capabilityRegistry } from './services/capabilities/CapabilityRegistry'
 import { registerBuiltinCapabilities } from './services/capabilities/builtins'
@@ -296,11 +297,16 @@ app.post('/action/submit_goal', requireAuth, async (req, res, next) => {
 
 app.get('/api/orch/jobs', (_req, res) => {
   try {
-    const { active, queue } = taskOrchestrator.listJobs()
-    const jobs: Array<{ id: string; goal?: string; status?: string; flightSummary?: any; travelPlan?: any }> = []
-    if (active) jobs.push({ id: active.id, goal: active.goal, status: active.status, flightSummary: (active as any).flightSummary, travelPlan: (active as any).travelPlan })
-    for (const j of queue) jobs.push({ id: j.id, goal: j.goal, status: j.status, flightSummary: (j as any).flightSummary, travelPlan: (j as any).travelPlan })
-    res.json(jobs)
+    const { active, queue, history } = taskOrchestrator.listJobs()
+    const byId = new Map<string, { id: string; goal?: string; status?: string; waitingForPromptId?: string; flightSummary?: any; travelPlan?: any }>()
+    const put = (j: any) => {
+      if (!j || typeof j.id !== 'string') return
+      byId.set(j.id, { id: j.id, goal: j.goal, status: j.status, waitingForPromptId: (j as any).waitingForPromptId, flightSummary: (j as any).flightSummary, travelPlan: (j as any).travelPlan })
+    }
+    if (active) put(active)
+    for (const j of queue || []) put(j)
+    for (const j of (history || []).slice(-20).reverse()) put(j)
+    res.json(Array.from(byId.values()))
   } catch {
     res.status(500).json({ error: 'orch_unavailable' })
   }
@@ -354,6 +360,8 @@ app.use('/api/connectors', connectorsRoutes)
 app.use('/api/orchestrator', orchestratorRoutes)
 
 app.use('/api/ghost', requireAuth, ghostRoutes)
+
+app.use('/api/hands', requireAuth, handsRoutes)
 
 app.use('/api/ai', requireAuth, aiRoutes)
 

@@ -39,6 +39,18 @@ router.get('/jobs/:id', async (req, res) => {
     }
 })
 
+router.post('/cancel/:id', async (req, res) => {
+    try {
+        const id = req.params.id
+        const ok = await taskOrchestrator.cancel(id)
+        if (!ok) return res.status(404).json({ error: 'job_not_found' })
+        res.json({ ok: true })
+    } catch (error) {
+        logger.error('Failed to cancel job', { error })
+        res.status(500).json({ error: 'internal_error' })
+    }
+})
+
 router.post('/interact/:promptId', async (req, res) => {
     try {
         const promptId = req.params.promptId

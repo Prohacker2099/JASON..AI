@@ -88,7 +88,7 @@ function levenshteinDistance(a: string, b: string): number {
   return d[m][n]
 }
 
-async function correctTyposWithAI(input: string): string {
+async function correctTyposWithAI(input: string): Promise<string> {
   const systemPrompt = `You are JASON's Semantic Input Refiner.
   The user provided a request that may have typos, grammatical errors, or ambiguous intent.
   Your job is to:
@@ -104,7 +104,11 @@ async function correctTyposWithAI(input: string): string {
 
   try {
     const response = await mistralClient.generate(systemPrompt, `Correct this: ${input}`)
-    return response.trim()
+    const out = String(response || '').trim()
+    if (!out) return input
+    // Guard against pathological outputs (multi-line essays, JSON blocks, etc.)
+    if (out.length > 500) return input
+    return out
   } catch (e) {
     console.error("[HTNPlanner] AI typo correction failed:", e)
     return correctTypos(input) // Fallback to dictionary
@@ -141,6 +145,88 @@ function correctTypos(input: string): string {
   }).join(' ')
 }
 
+ function addDaysIso(iso: string, days: number): string | null {
+   const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/)
+   if (!m) return null
+   const dt = new Date(Date.UTC(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10)))
+   if (!Number.isFinite(dt.getTime())) return null
+   dt.setUTCDate(dt.getUTCDate() + Math.max(0, Math.floor(days)))
+   const y = dt.getUTCFullYear()
+   const mo = String(dt.getUTCMonth() + 1).padStart(2, '0')
+   const d = String(dt.getUTCDate()).padStart(2, '0')
+   return `${y}-${mo}-${d}`
+ }
+
+ function parseCurrency(text: string): string | null {
+   const m = String(text || '').toUpperCase().match(/\b(GBP|USD|EUR|AUD|CAD|NZD|CHF|JPY|SGD|HKD|INR|ZAR|SEK|NOK|DKK)\b/)
+   return m ? m[1] : null
+ }
+
+ function parseOriginIata(text: string): string | null {
+   const t = String(text || '').toUpperCase()
+   const m = t.match(/\bFROM\s+([A-Z]{3})\b/)
+   return m ? m[1] : null
+ }
+
+ function parseMonthDayToIso(text: string): string | null {
+   const t = String(text || '').toLowerCase()
+   const months: Record<string, number> = {
+     jan: 1, january: 1,
+     feb: 2, february: 2,
+     mar: 3, march: 3,
+     apr: 4, april: 4,
+     may: 5,
+     jun: 6, june: 6,
+     jul: 7, july: 7,
+     aug: 8, august: 8,
+     sep: 9, sept: 9, september: 9,
+     oct: 10, october: 10,
+     nov: 11, november: 11,
+     dec: 12, december: 12,
+   }
+
+   const iso = t.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/)
+   if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`
+
+   const dmy = t.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)(?:\s+(20\d{2}))?\b/)
+   const mdy = t.match(/\b(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s+(20\d{2}))?\b/)
+
+   let day: number | null = null
+   let month: number | null = null
+   let explicitYear: number | null = null
+
+   if (dmy) {
+     day = parseInt(dmy[1], 10)
+     month = months[dmy[2]]
+     explicitYear = dmy[3] ? parseInt(dmy[3], 10) : null
+   } else if (mdy) {
+     day = parseInt(mdy[2], 10)
+     month = months[mdy[1]]
+     explicitYear = mdy[3] ? parseInt(mdy[3], 10) : null
+   }
+
+   if (!day || !month) return null
+
+   const now = new Date()
+   const baseYear = explicitYear && Number.isFinite(explicitYear) ? explicitYear : now.getUTCFullYear()
+   const candidate = new Date(Date.UTC(baseYear, month - 1, day))
+   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+   const year = candidate.getTime() < today.getTime() ? baseYear + 1 : baseYear
+
+   const y = year
+   const mo = String(month).padStart(2, '0')
+   const d = String(day).padStart(2, '0')
+   return `${y}-${mo}-${d}`
+ }
+
+ function resolveDestination(text: string): { label: string; code: string } {
+   const t = String(text || '').toLowerCase()
+   if (t.includes('japan') || t.includes('tokyo')) return { label: 'Japan', code: 'NRT' }
+   if (t.includes('osaka')) return { label: 'Osaka', code: 'KIX' }
+   if (t.includes('kyoto')) return { label: 'Kyoto', code: 'KIX' }
+   return { label: 'Destination', code: 'NRT' }
+ }
+
 export function compilePlan(goal: string, context?: Record<string, any>): Plan {
   console.log(`[HTNPlanner] Compiling plan for goal: "${goal}"`)
   const rawGoal = (goal || '').toLowerCase()
@@ -166,72 +252,39 @@ export function compilePlan(goal: string, context?: Record<string, any>): Plan {
     const destinationMatch = g.match(travelRegex)
     const durationMatch = g.match(durationRegex)
 
-    const destination = destinationMatch ? destinationMatch[1].trim() : 'Destination'
-    const days = durationMatch ? parseInt(durationMatch[1]) : 7
-    const styleLabel = g.includes('luxury') ? 'Luxury' : (g.includes('budget') ? 'Budget' : 'Standard')
+    const resolved = resolveDestination(destinationMatch ? destinationMatch[1] : g)
+    const destinationLabel = resolved.label
+    const destinationCode = resolved.code
+    const days = durationMatch ? Math.max(1, Math.min(60, parseInt(durationMatch[1], 10))) : 7
 
-    // Extract date if present (very basic parsing)
-    const yearMatch = g.match(/202\d/)
-    const dateStr = yearMatch ? `Jan 29th ${yearMatch[0]}` : 'upcoming date' // Placeholder for sophisticated NLP date parsing
+    const depart = parseMonthDayToIso(g) || addDaysIso(new Date().toISOString().slice(0, 10), 14) || new Date().toISOString().slice(0, 10)
+    const ret = addDaysIso(depart, days)
+    const origin = parseOriginIata(g) || String((context as any)?.origin || '').toUpperCase() || 'LHR'
+    const currency = parseCurrency(g) || String((context as any)?.currency || '').toUpperCase() || 'GBP'
+    const wantsCheapest = g.includes('budget') || g.includes('cheap') || g.includes('cheapest')
+    const cabin = g.includes('luxury') ? 'business' : (wantsCheapest ? 'economy' : 'economy')
 
-    tasks.push({ id: genId(`analyze_prefs_${destination}`), name: `Analyze preferences for ${destination} trip`, tags: ['analyze', 'safe', 'travel'] })
-
-    // 1. Research Phase
-    tasks.push({
-      id: genId(`research_${destination}`),
-      name: `Research: Top experiences in ${destination} for ${days} days (${styleLabel})`,
-      action: {
-        type: 'web', // This would trigger Ghost Hand web scraping
-        name: 'web_search',
-        payload: { query: `best 10 ${styleLabel} things to do in ${destination} ${days} days itinerary` },
-        riskLevel: 0.1
-      }
-    })
+    tasks.push({ id: genId(`analyze_prefs_${destinationLabel}`), name: `Analyze preferences for ${destinationLabel} trip`, tags: ['analyze', 'safe', 'travel'] })
 
     tasks.push({
-      id: genId(`flight_search_${destination}`),
-      name: `Find flights to ${destination}`,
+      id: genId(`flight_search_${destinationLabel}`),
+      name: `Fast flight search (${origin} -> ${destinationCode})`,
       action: {
         type: 'web',
         name: 'flight_search',
-        payload: { destination, origin: 'Current Location', date: dateStr },
-        riskLevel: 0.2
-      }
-    })
-
-    // 2. Planning Phase
-    tasks.push({ id: genId(`draft_itinerary_${destination}`), name: `Draft day-by-day itinerary`, tags: ['draft', 'safe'] })
-
-    // 3. Output Phase (Word Doc)
-    tasks.push({
-      id: genId(`generate_report_${destination}`),
-      name: `Generate Word Document Report`,
-      action: {
-        type: 'http', // Call JASON Engine via HTTP
-        name: 'generate_report',
         payload: {
-          title: `JASON Itinerary: ${days} Days in ${destination}`,
-          sections: [
-            { heading: 'Trip Overview', content: `A ${styleLabel} trip to ${destination} for ${days} days.` },
-            { heading: 'Flight Options', content: 'Checking best flights...' },
-            { heading: 'Itinerary', content: 'Day 1: Arrival...' },
-            { heading: 'Cost Estimate', content: 'Total: $TBD' }
-          ],
-          output_path: `C:\\Users\\supro\\Desktop\\${destination}_Itinerary.docx`
+          mode: 'flight_search',
+          origin,
+          destination: destinationCode,
+          departureDate: depart,
+          returnDate: ret || undefined,
+          passengers: 1,
+          cabin,
+          currency,
+          limit: 25,
         },
-        riskLevel: 0
-      }
-    })
-
-    // 4. Notification
-    tasks.push({
-      id: genId('notify_user_done'),
-      name: 'Notify User: Itinerary Ready',
-      action: {
-        type: 'ui', // Used UI as closest proxy for system notification
-        name: 'notification',
-        payload: { title: 'JASON', message: `Your ${destination} itinerary is ready on the Desktop.` },
-        riskLevel: 0
+        riskLevel: 0.2,
+        tags: ['help', 'safe', 'travel', 'flight']
       }
     })
 
@@ -589,13 +642,15 @@ export async function compilePlanUniversal(goal: string, context?: Record<string
     console.log(`[HTNPlanner] AI Refined Goal: "${goal}" -> "${correctedGoal}"`)
   }
 
+  const finalGoal = String(correctedGoal || '').trim() ? correctedGoal : goal
+
   // 2. Try rule-based planning first (for high-fidelity presets)
-  const plan = compilePlan(correctedGoal, context)
+  const plan = compilePlan(finalGoal, context)
 
   // 3. If rule-based didn't produce tasks, use universal LLM decomposition
   if (plan.tasks.length === 0) {
     console.log(`[HTNPlanner] Rule-base empty. Decomposing with Omnipotent AI Strategist...`)
-    const llmTasks = await decomposeGoalWithLLM(correctedGoal, context)
+    const llmTasks = await decomposeGoalWithLLM(finalGoal, context)
     plan.tasks.push(...llmTasks)
   }
 
@@ -612,11 +667,25 @@ export async function compilePlanUniversal(goal: string, context?: Record<string
   return plan
 }
 
-export async function executePlan(plan: Plan, options?: { simulate?: boolean; sandbox?: { allowedHosts?: string[]; allowProcess?: boolean; allowPowershell?: boolean; allowApp?: boolean; allowUI?: boolean }, completedTaskIds?: Set<string> }): Promise<{ results: Array<{ taskId: string; ok: boolean; result?: any; error?: string }>; status: 'completed' | 'paused' | 'failed'; pausedTaskId?: string; promptId?: string }> {
+export async function executePlan(
+  plan: Plan,
+  options?: {
+    simulate?: boolean
+    sandbox?: { allowedHosts?: string[]; allowProcess?: boolean; allowPowershell?: boolean; allowApp?: boolean; allowUI?: boolean }
+    completedTaskIds?: Set<string>
+  }
+): Promise<{
+  results: Array<{ taskId: string; ok: boolean; result?: any; error?: string }>
+  status: 'completed' | 'paused' | 'failed'
+  pausedTaskId?: string
+  promptId?: string
+  pausedKind?: 'retry_task'
+}> {
   const results: Array<{ taskId: string; ok: boolean; result?: any; error?: string }> = []
   let paused = false
   let pausedTaskId: string | undefined
   let promptId: string | undefined
+  let pausedKind: 'retry_task' | undefined
 
   async function runTask(t: PlanTask): Promise<void> {
     if (paused) return
@@ -651,14 +720,18 @@ export async function executePlan(plan: Plan, options?: { simulate?: boolean; sa
         allowApp: options?.sandbox?.allowApp,
         allowUI: options?.sandbox?.allowUI,
       })
-      results.push({ taskId: t.id, ok: res.ok, result: res.result, error: res.error })
+      const okForPlan = !!res.ok || !!t.optional
+      const resultPayload = (!res.ok && t.optional)
+        ? { ...(res.result || {}), optionalFailed: true }
+        : res.result
+      results.push({ taskId: t.id, ok: okForPlan, result: resultPayload, error: res.error })
 
       // SCRL: review execution with alignment score
       try {
         const planned = { id: t.id, name: t.name, tags: t.tags, riskLevel: t.riskLevel, action: t.action }
         const alignmentScore = alignmentModel.scoreForAction(t.action as ActionDefinition)
         const actual = { result: res.result, error: res.error, status: (res as any)?.status, alignmentScore }
-        await scrl.reviewExecution(plan.id, t.id, planned, actual, res.ok)
+        await scrl.reviewExecution(plan.id, t.id, planned, actual, okForPlan)
       } catch { }
 
       // CAPTCHA Strategy (Tier 3 Collaborative Loop): request L3 confirmation and skip fallbacks for this sub-task
@@ -666,12 +739,24 @@ export async function executePlan(plan: Plan, options?: { simulate?: boolean; sa
         try {
           const prompt = permissionManager.createPrompt({
             level: 3,
-            title: `CAPTCHA encountered for ${t.action?.name || t.name}`,
-            rationale: 'Automation paused to avoid illegal bypass. Approve to allow manual intervention or alternate strategy.',
+            title: `Verification required for ${t.action?.name || t.name}`,
+            rationale: `Real flight sites may require consent/CAPTCHA. Please complete verification in the opened browser window, then click RESUME in SovereignOS to retry.\n\nProvider: ${(res.result as any)?.providerId || 'unknown'}\nURL: ${(res.result as any)?.url || 'n/a'}`,
             options: ['approve', 'reject', 'delay'],
             meta: { taskId: t.id, action: t.action }
           })
-          try { sseBroker.broadcast('stealth:captcha_prompt', { promptId: prompt.id, taskId: t.id }) } catch { }
+          try { sseBroker.broadcast('orch:interaction', { taskId: t.id, prompt, kind: 'captcha' }) } catch { }
+
+          // Overwrite the last result entry to mark it as a pending interaction rather than a failure.
+          const lastIdx = results.length - 1
+          if (lastIdx >= 0 && results[lastIdx]?.taskId === t.id) {
+            results[lastIdx] = { taskId: t.id, ok: true, result: { status: 'pending_interaction', promptId: prompt.id, ...(res.result || {}) }, error: res.error }
+          }
+
+          paused = true
+          pausedKind = 'retry_task'
+          pausedTaskId = t.id
+          promptId = prompt.id
+          return
         } catch { } // Fix: Added missing closing brace for the try block
       }
 
@@ -701,7 +786,8 @@ export async function executePlan(plan: Plan, options?: { simulate?: boolean; sa
     results,
     status: paused ? 'paused' : (results.every(r => r.ok) ? 'completed' : 'failed'),
     pausedTaskId,
-    promptId
+    promptId,
+    pausedKind
   }
 }
 

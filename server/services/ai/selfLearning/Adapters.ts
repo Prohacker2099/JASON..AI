@@ -3,7 +3,7 @@ import { spawn } from 'child_process'
 import { promises as fs } from 'fs'
 
 export type ActionDefinition = {
-  type: 'http' | 'process' | 'device' | 'file' | 'powershell' | 'app' | 'web' | 'connector' | 'ui'
+  type: 'http' | 'process' | 'device' | 'file' | 'powershell' | 'app' | 'web' | 'connector' | 'ui' | 'system' | 'interact'
   name?: string
   payload?: any
   riskLevel?: number

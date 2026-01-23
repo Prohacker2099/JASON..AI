@@ -35,7 +35,35 @@ export class FastFlightSearchAdapter implements ActionAdapter {
 
       return { ok: true, result }
     } catch (e: any) {
-      return { ok: false, error: e?.message || 'flight_search_failed' }
+      const msg = e?.message || 'flight_search_failed'
+      if (typeof msg === 'string' && msg.startsWith('captcha_detected|')) {
+        const parts = msg.split('|')
+        const providerId = parts[1] || 'unknown'
+        const url = parts.slice(2).join('|')
+        const offers = flightSearchService.buildProviderLinks({
+          origin: String((a.payload as any)?.origin || ''),
+          destination: String((a.payload as any)?.destination || ''),
+          departureDate: String((a.payload as any)?.departureDate || ''),
+          returnDate: (a.payload as any)?.returnDate ? String((a.payload as any)?.returnDate) : undefined,
+          passengers: typeof (a.payload as any)?.passengers === 'number' ? (a.payload as any)?.passengers : 1,
+          cabin: (a.payload as any)?.cabin ? String((a.payload as any)?.cabin) : undefined,
+          currency: (a.payload as any)?.currency ? String((a.payload as any)?.currency) : undefined,
+          limit: typeof (a.payload as any)?.limit === 'number' ? (a.payload as any)?.limit : undefined,
+        })
+        return {
+          ok: false,
+          error: 'captcha_detected',
+          result: {
+            providerId,
+            url,
+            best: null,
+            offers,
+            meta: { source: 'links', cache: 'miss', durationMs: 0, error: 'captcha_detected', needsHuman: true },
+          },
+        }
+      }
+
+      return { ok: false, error: msg }
     }
   }
 }

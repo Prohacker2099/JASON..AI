@@ -1,5 +1,3 @@
-import axios from 'axios'
-import Amadeus from 'amadeus'
 import { flightScraper, FlightScrapeResult } from './FlightScraper'
 
 export type FlightSearchParams = {
@@ -130,23 +128,28 @@ async function searchBrowserScraping(p: FlightSearchParams): Promise<FlightOffer
     await flightScraper.init()
     
     let results: FlightScrapeResult[] = []
+    let lastError: string | undefined
     
     // Try Google Flights first
     try {
-      const googleResults = await flightScraper.scrapeGoogleFlights(origin, destination, departureDate, returnDate)
+      const googleResults = await flightScraper.scrapeGoogleFlights(origin, destination, departureDate, returnDate, currency)
       results.push(...googleResults)
-    } catch (e) {
-      console.log('Google Flights scraping failed, trying Kayak...')
+    } catch (e: any) {
+      lastError = e?.message || String(e)
     }
     
     // Fallback to Kayak if Google fails or for more results
     if (results.length === 0) {
       try {
-        const kayakResults = await flightScraper.scrapeKayak(origin, destination, departureDate, returnDate)
+        const kayakResults = await flightScraper.scrapeKayak(origin, destination, departureDate, returnDate, currency)
         results.push(...kayakResults)
-      } catch (e) {
-        console.log('Kayak scraping failed')
+      } catch (e: any) {
+        lastError = e?.message || String(e)
       }
+    }
+
+    if (results.length === 0) {
+      throw new Error(lastError || 'no_prices_extracted')
     }
     
     // Convert scraped results to FlightOffer format
@@ -168,17 +171,20 @@ async function searchBrowserScraping(p: FlightSearchParams): Promise<FlightOffer
     })
     
     return offers
-  } catch (error) {
-    console.error('Browser scraping failed:', error)
-    throw new Error(`browser_scraping_failed: ${error}`)
-  } finally {
-    await flightScraper.cleanup()
+  } catch (error: any) {
+    const msg = error?.message || String(error)
+    console.error('Browser scraping failed:', msg)
+    throw new Error(msg)
   }
 }
 
 export class FlightSearchService {
   private cache = new Map<string, CacheEntry>()
   private ttlMs = 30_000
+
+  buildProviderLinks(params: FlightSearchParams): FlightOffer[] {
+    return buildLinks(params)
+  }
 
   async search(params: FlightSearchParams): Promise<FlightSearchResult> {
     const started = Date.now()
@@ -217,7 +223,13 @@ export class FlightSearchService {
         source = 'browser'
       }
     } catch (e: any) {
-      error = e?.message || 'browser_scraping_failed'
+      const msg = e?.message || 'browser_scraping_failed'
+      // Important: if we were bot-blocked/CAPTCHA'd, do NOT silently fall back to links.
+      // We want the orchestrator to pause and ask the user to verify in the opened browser.
+      if (String(msg).startsWith('captcha_detected|')) {
+        throw new Error(String(msg))
+      }
+      error = msg
       offers = []
     }
 

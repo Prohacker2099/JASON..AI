@@ -1,0 +1,25 @@
+{
+  "samples": [
+    {
+      "features": [],
+      "label": 1
+    },
+    {
+      "features": [],
+      "label": 0
+    },
+    {
+      "features": [],
+      "label": 1
+    },
+    {
+      "features": [],
+      "label": 1
+    },
+    {
+      "features": [],
+      "label": 1
+    }
+  ],
+  "updatedAt": 1769197775735
+}

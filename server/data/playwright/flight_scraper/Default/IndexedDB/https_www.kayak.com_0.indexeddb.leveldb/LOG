@@ -1,0 +1,33 @@
+2026/01/23-19:39:38.815 71b0 Reusing MANIFEST C:\Users\supro\Downloads\JASON_TheOmnipotentAIArchitect\server\data\playwright\flight_scraper\Default\IndexedDB\https_www.kayak.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/01/23-19:39:38.823 71b0 Recovering log #7
+2026/01/23-19:39:38.824 71b0 Reusing old log C:\Users\supro\Downloads\JASON_TheOmnipotentAIArchitect\server\data\playwright\flight_scraper\Default\IndexedDB\https_www.kayak.com_0.indexeddb.leveldb/000007.log 
+2026/01/23-19:39:41.840 515c Level-0 table #11: started
+2026/01/23-19:39:41.878 515c Level-0 table #11: 544 bytes OK
+2026/01/23-19:39:41.883 515c Delete type=0 #7
+2026/01/23-19:39:41.883 515c Manual compaction at level-0 from '\x00\x03\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x04\x00\x00\x00' @ 0 : 0; will stop at '\x00\x03\x00\x00\x05' @ 45 : 1
+2026/01/23-19:39:41.884 515c Compacting 1@0 + 1@1 files
+2026/01/23-19:39:41.924 515c Generated table #12@0: 8 keys, 512 bytes
+2026/01/23-19:39:41.924 515c Compacted 1@0 + 1@1 files => 512 bytes
+2026/01/23-19:39:41.928 515c compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/01/23-19:39:41.929 515c Delete type=2 #11
+2026/01/23-19:39:41.930 515c Manual compaction at level-0 from '\x00\x03\x00\x00\x05' @ 45 : 1 .. '\x00\x04\x00\x00\x00' @ 0 : 0; will stop at (end)
+2026/01/23-19:39:43.855 71b0 Level-0 table #14: started
+2026/01/23-19:39:43.880 71b0 Level-0 table #14: 249 bytes OK
+2026/01/23-19:39:43.884 71b0 Delete type=2 #8
+2026/01/23-19:39:43.884 71b0 Delete type=0 #10
+2026/01/23-19:39:43.885 71b0 Manual compaction at level-0 from (begin) .. (end); will stop at '\x00\x00\x00\x002\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00' @ 59 : 0
+2026/01/23-19:39:43.885 71b0 Compacting 1@0 + 1@1 files
+2026/01/23-19:39:43.910 71b0 Generated table #15@0: 10 keys, 537 bytes
+2026/01/23-19:39:43.911 71b0 Compacted 1@0 + 1@1 files => 537 bytes
+2026/01/23-19:39:43.915 71b0 compacted to: files[ 0 1 1 0 0 0 0 ]
+2026/01/23-19:39:43.916 71b0 Delete type=2 #12
+2026/01/23-19:39:43.916 71b0 Delete type=2 #14
+2026/01/23-19:39:43.917 71b0 Manual compaction at level-0 from '\x00\x00\x00\x002\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00' @ 59 : 0 .. (end); will stop at (end)
+2026/01/23-19:39:43.917 71b0 Manual compaction at level-1 from (begin) .. (end); will stop at '\x00\x00\x00\x00\xc9\x17\x00h\x00t\x00t\x00p\x00s\x00_\x00w\x00w\x00w\x00.\x00k\x00a\x00y\x00a\x00k\x00.\x00c\x00o\x00m\x00_\x000\x00@\x001\x13\x00d\x00b\x008\x000\x009\x005\x00.\x003\x003\x004\x000\x006\x004\x003\x007\x003\x001\x001\x004' @ 30 : 0
+2026/01/23-19:39:43.917 71b0 Compacting 1@1 + 1@2 files
+2026/01/23-19:39:43.939 71b0 Generated table #16@1: 6 keys, 253 bytes
+2026/01/23-19:39:43.939 71b0 Compacted 1@1 + 1@2 files => 253 bytes
+2026/01/23-19:39:43.941 71b0 compacted to: files[ 0 0 1 0 0 0 0 ]
+2026/01/23-19:39:43.942 71b0 Delete type=2 #5
+2026/01/23-19:39:43.942 71b0 Delete type=2 #15
+2026/01/23-19:39:43.943 71b0 Manual compaction at level-1 from '\x00\x00\x00\x00\xc9\x17\x00h\x00t\x00t\x00p\x00s\x00_\x00w\x00w\x00w\x00.\x00k\x00a\x00y\x00a\x00k\x00.\x00c\x00o\x00m\x00_\x000\x00@\x001\x13\x00d\x00b\x008\x000\x009\x005\x00.\x003\x003\x004\x000\x006\x004\x003\x007\x003\x001\x001\x004' @ 30 : 0 .. (end); will stop at (end)

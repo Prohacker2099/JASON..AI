@@ -151,6 +151,19 @@ export class DAISandbox {
     const base = { ...DEFAULT, ...(options || {}) }
     const opt = { ...base, allowedHosts: (base.allowedHosts && base.allowedHosts.length ? base.allowedHosts : getAllowedHosts()) }
 
+    const isBackgroundWeb = (() => {
+      if (action.type !== 'web') return false
+      const mode = String((action.payload || {}).mode || '').toLowerCase()
+      // These web modes run headless and do not touch the user's foreground input.
+      return (
+        mode === 'flight_search' ||
+        mode === 'flight_arbitrage' ||
+        mode === 'text' ||
+        mode === 'html' ||
+        mode === 'title'
+      )
+    })()
+
     // Global kill switch: if paused, do not execute
     try {
       if (typeof (permissionManager as any).isPaused === 'function' && (permissionManager as any).isPaused()) {
@@ -177,7 +190,14 @@ export class DAISandbox {
 
     // User Priority Guardrail: avoid interfering with foreground input
     try {
-      if (action.type === 'web' || action.type === 'process' || action.type === 'powershell' || action.type === 'app' || action.type === 'ui') {
+      const needsIdle =
+        action.type === 'process' ||
+        action.type === 'powershell' ||
+        action.type === 'app' ||
+        action.type === 'ui' ||
+        (action.type === 'web' && !isBackgroundWeb)
+
+      if (needsIdle) {
         const idle = await waitForUserIdle(10000, 800)
         if (!idle) {
           return { ok: false, error: 'deferred_due_to_user_activity' }

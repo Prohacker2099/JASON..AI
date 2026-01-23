@@ -2,6 +2,7 @@ import { EventEmitter } from 'events'
 import { prisma } from '../../src/db'
 import { sseBroker } from '../websocket-service'
 import { compilePlan, executePlan, Plan } from '../planner/HTNPlanner'
+import { permissionManager } from '../trust/PermissionManager'
 
 export type TravelPlanSummary = {
   scenario: string
@@ -41,7 +42,7 @@ export type OrchestratorJob = {
   travelPlan?: TravelPlanSummary
 }
 
-function genId(p: string) { return `${p}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}` }
+function genId(p: string) { return `${p}_${globalThis.Date.now()}_${Math.random().toString(36).slice(2, 7)}` }
 
 export class TaskOrchestrator extends EventEmitter {
   private queue: OrchestratorJob[] = []
@@ -85,8 +86,8 @@ export class TaskOrchestrator extends EventEmitter {
       simulate: (input.simulate ?? false),
       sandbox: input.sandbox,
       status: 'queued',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: globalThis.Date.now(),
+      updatedAt: globalThis.Date.now(),
       completedTaskIds: []
     }
     this.queue.push(job)
@@ -102,7 +103,7 @@ export class TaskOrchestrator extends EventEmitter {
   async cancel(id: string): Promise<boolean> {
     if (this.active && this.active.id === id) {
       this.active.status = 'cancelled'
-      this.active.updatedAt = Date.now()
+      this.active.updatedAt = globalThis.Date.now()
       try { sseBroker.broadcast('orch:job', { id, status: 'cancelled' }) } catch { }
       this.emit('job', { type: 'cancelled', job: this.active })
       await this.log({ type: 'cancelled', job: this.active })
@@ -113,7 +114,7 @@ export class TaskOrchestrator extends EventEmitter {
     if (idx >= 0) {
       const [job] = this.queue.splice(idx, 1)
       job.status = 'cancelled'
-      job.updatedAt = Date.now()
+      job.updatedAt = globalThis.Date.now()
       try { sseBroker.broadcast('orch:job', { id, status: 'cancelled' }) } catch { }
       this.emit('job', { type: 'cancelled', job })
       await this.log({ type: 'cancelled', job })
@@ -142,7 +143,7 @@ export class TaskOrchestrator extends EventEmitter {
 
       this.active = job
       job.status = 'running'
-      job.updatedAt = Date.now()
+      job.updatedAt = globalThis.Date.now()
       try { sseBroker.broadcast('orch:job', { id: job.id, status: 'running', goal: job.goal }) } catch { }
       this.emit('job', { type: 'started', job })
       await this.log({ type: 'started', job })
@@ -159,11 +160,13 @@ export class TaskOrchestrator extends EventEmitter {
         if (result.status === 'paused') {
           job.status = 'waiting_for_user'
           job.waitingForPromptId = result.promptId
-          job.updatedAt = Date.now()
+          job.updatedAt = globalThis.Date.now()
+          job.result = result
             // Store the task ID that caused the pause so we can mark it done on resume?
             // I'll add a temporary field to the job or just rely on finding it?
             // Let's add 'pausedTaskId' to OrchestratorJob temporarily via casting or proper type update.
             (job as any).pausedTaskId = result.pausedTaskId
+            ;(job as any).pausedKind = (result as any).pausedKind
 
           try { sseBroker.broadcast('orch:job', { id: job.id, status: 'waiting_for_user', promptId: result.promptId }) } catch { }
           await this.persist(job)
@@ -184,7 +187,13 @@ export class TaskOrchestrator extends EventEmitter {
           const flightTaskIds = new Set<string>()
           const collect = (tasks: any[]) => {
             for (const t of tasks || []) {
-              if (t && t.action && t.action.type === 'web' && t.action.payload && t.action.payload.mode === 'flight_arbitrage') {
+              if (
+                t &&
+                t.action &&
+                t.action.type === 'web' &&
+                t.action.payload &&
+                (t.action.payload.mode === 'flight_arbitrage' || t.action.payload.mode === 'flight_search')
+              ) {
                 if (typeof t.id === 'string') flightTaskIds.add(t.id)
               }
               if (Array.isArray(t?.children) && t.children.length > 0) collect(t.children)
@@ -194,24 +203,52 @@ export class TaskOrchestrator extends EventEmitter {
 
           if (flightTaskIds.size > 0 && result && Array.isArray((result as any).results)) {
             const entries: any[] = (result as any).results
-            const match = entries.find((r) => r && typeof r.taskId === 'string' && flightTaskIds.has(r.taskId))
-            if (match && match.result && typeof match.result === 'object') {
-              const exec = match.result as any
+            const matches = entries.filter((r) => r && typeof r.taskId === 'string' && flightTaskIds.has(r.taskId))
+
+            let bestPick: any = null
+            let bestPickPrice: number | null = null
+            let bestPickSummary: any = null
+
+            for (const m of matches) {
+              if (!m || !m.result || typeof m.result !== 'object') continue
+              const execOk = !!(m as any).ok
+              const exec = m.result as any
               const fr = exec && typeof exec === 'object' && exec.result ? exec.result : exec
-              if (fr && typeof fr === 'object') {
-                const best = fr.best || null
-                const meta = fr.meta || {}
-                flightSummary = {
-                  ok: !!(exec.ok && best && typeof best.price === 'number'),
-                  bestPrice: best && typeof best.price === 'number' ? best.price : null,
-                  currency: best && typeof best.currency === 'string' ? best.currency : null,
-                  siteId: best && typeof best.siteId === 'string' ? best.siteId : null,
-                  siteName: best && typeof best.siteName === 'string' ? best.siteName : null,
-                  reachedPaymentPage: !!fr.reachedPaymentPage,
-                  searchedSites: Array.isArray(meta.searchedSites) ? meta.searchedSites : undefined,
-                  errors: meta.errors && typeof meta.errors === 'object' ? meta.errors as Record<string, string> : undefined,
-                }
+              if (!fr || typeof fr !== 'object') continue
+
+              const best = (fr as any).best || null
+              const meta = (fr as any).meta || {}
+              const offersCount = Array.isArray((fr as any).offers) ? (fr as any).offers.length : undefined
+              const price = best && typeof best.price === 'number' ? best.price : null
+
+              const summary = {
+                ok: execOk && (typeof price === 'number' || (typeof offersCount === 'number' && offersCount > 0)),
+                bestPrice: typeof price === 'number' ? price : null,
+                currency: best && typeof best.currency === 'string' ? best.currency : null,
+                siteId: best && typeof best.siteId === 'string' ? best.siteId : (best && typeof best.providerId === 'string' ? best.providerId : null),
+                siteName: best && typeof best.siteName === 'string' ? best.siteName : (best && typeof best.providerName === 'string' ? best.providerName : null),
+                reachedPaymentPage: !!(fr as any).reachedPaymentPage,
+                searchedSites: Array.isArray(meta.searchedSites) ? meta.searchedSites : undefined,
+                errors: meta.errors && typeof meta.errors === 'object' ? meta.errors as Record<string, string> : undefined,
+                offersCount,
               }
+
+              // Prefer any entry with a numeric price; pick the cheapest numeric price
+              if (typeof price === 'number') {
+                if (bestPickPrice == null || price < bestPickPrice) {
+                  bestPickPrice = price
+                  bestPick = m
+                  bestPickSummary = summary
+                }
+              } else if (!bestPickSummary) {
+                // Fallback if no priced option ever appears
+                bestPick = m
+                bestPickSummary = summary
+              }
+            }
+
+            if (bestPickSummary) {
+              flightSummary = bestPickSummary
             }
           }
         } catch { }
@@ -273,7 +310,7 @@ export class TaskOrchestrator extends EventEmitter {
         if (flightSummary) job.flightSummary = flightSummary
         if (travelPlan) job.travelPlan = travelPlan
 
-        job.updatedAt = Date.now()
+        job.updatedAt = globalThis.Date.now()
         try { sseBroker.broadcast('orch:job', { id: job.id, status: job.status, result, flightSummary, travelPlan }) } catch { }
         this.emit('job', { type: job.status, job, result, flightSummary, travelPlan })
         await this.log({ type: job.status, job, result, flightSummary, travelPlan })
@@ -281,7 +318,7 @@ export class TaskOrchestrator extends EventEmitter {
       } catch (e: any) {
         job.status = 'failed'
         job.error = e?.message || 'execute_failed'
-        job.updatedAt = Date.now()
+        job.updatedAt = globalThis.Date.now()
         try { sseBroker.broadcast('orch:job', { id: job.id, status: 'failed', error: job.error }) } catch { }
         this.emit('job', { type: 'failed', job, error: job.error })
         await this.log({ type: 'failed', job, error: job.error })
@@ -297,16 +334,48 @@ export class TaskOrchestrator extends EventEmitter {
     if (jobIndex === -1) return false
 
     const job = this.queue[jobIndex]
-    const taskId = (job as any).pausedTaskId
-    if (taskId) {
-      job.completedTaskIds = [...(job.completedTaskIds || []), taskId]
-      // Optionally save the response text as the result of that task?
-      // job.result.results.find... complicated.
+
+    const decision = typeof response === 'string'
+      ? response
+      : typeof response?.decision === 'string'
+        ? response.decision
+        : 'approve'
+
+    if (decision === 'delay') {
+      return true
     }
+
+    if (decision === 'reject') {
+      // Cancel the job
+      this.queue.splice(jobIndex, 1)
+      job.status = 'cancelled'
+      job.waitingForPromptId = undefined
+      job.updatedAt = globalThis.Date.now()
+      try { sseBroker.broadcast('orch:job', { id: job.id, status: 'cancelled' }) } catch { }
+      await this.persist(job)
+      return true
+    }
+
+    // Clear the trust prompt so it doesn't remain stuck in the pending list.
+    try {
+      permissionManager.decide(promptId, 'approve', { source: 'orchestrator', response })
+    } catch { }
+
+    const taskId = (job as any).pausedTaskId as string | undefined
+    const pausedKind = (job as any).pausedKind as string | undefined
+
+    // For normal interact steps, mark the paused task as completed so we move forward.
+    // For captcha retry steps, do NOT mark it completed; we want to rerun the task.
+    if (taskId && pausedKind !== 'retry_task') {
+      job.completedTaskIds = [...(job.completedTaskIds || []), taskId]
+    }
+
+    ;(job as any).pausedTaskId = undefined
+    ;(job as any).pausedKind = undefined
 
     job.status = 'queued'
     job.waitingForPromptId = undefined
-    job.updatedAt = Date.now()
+    job.updatedAt = globalThis.Date.now()
 
     try { sseBroker.broadcast('orch:job', { id: job.id, status: 'resumed' }) } catch { }
     await this.persist(job)
@@ -339,7 +408,7 @@ export class TaskOrchestrator extends EventEmitter {
       const toResume: OrchestratorJob[] = []
       latest.forEach((job) => {
         if (job.status === 'queued' || job.status === 'running') {
-          const copy: OrchestratorJob = { ...job, status: 'queued', updatedAt: Date.now(), result: undefined, error: undefined }
+          const copy: OrchestratorJob = { ...job, status: 'queued', updatedAt: globalThis.Date.now(), result: undefined, error: undefined }
           toResume.push(copy)
         }
       })

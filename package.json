@@ -14,6 +14,7 @@
     "test": "npm run test:server && npm run test:client",
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
+    "test:hands": "node scripts/tests/hands-smoke.mjs",
     "test:http": "node scripts/tests/http-latency.mjs",
     "test:ai": "node scripts/tests/ai-trainer-benchmark.mjs",
     "test:page": "node scripts/tests/page-load.mjs",
