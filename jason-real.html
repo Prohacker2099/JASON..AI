@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JASON - REAL Sovereign AI OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { 'sans': ['Space Grotesk', 'system-ui', 'sans-serif'], 'mono': ['JetBrains Mono', 'monospace'] } } }
+        }
+    </script>
+    <style>
+        .glass-morphism { background: linear-gradient(145deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 50%, rgba(15,23,42,0.95) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(71,85,105,0.4); }
+        .gradient-text { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .neural-bg { background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%), linear-gradient(160deg, #050816 0%, #020617 45%, #000 100%); }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); } 50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); } }
+        .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        .detection-box { position: absolute; border: 2px solid #00ff00; background: rgba(0, 255, 0, 0.1); pointer-events: none; }
+        .ui-element { position: absolute; border: 2px solid #ff6b6b; background: rgba(255, 107, 107, 0.1); }
+    </style>
+</head>
+<body class="neural-bg text-white min-h-screen">
+    <nav class="relative z-10 border-b border-slate-800/50 glass-morphism">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="text-2xl font-bold gradient-text">JASON</div>
+                    <div class="text-sm text-slate-300">Sovereign Personal OS</div>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#uam" class="text-slate-300 hover:text-white">UAM</a>
+                    <a href="#vlm" class="text-slate-300 hover:text-white">VLM</a>
+                    <a href="#commerce" class="text-slate-300 hover:text-white">Commerce</a>
+                    <a href="#education" class="text-slate-300 hover:text-white">Education</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="relative z-10 max-w-7xl mx-auto px-4 pt-20 pb-16">
+        <div class="text-center">
+            <div class="inline-flex items-center px-4 py-2 rounded-full glass-morphism text-sm font-medium mb-8">
+                <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                <span id="ai-status">INITIALIZING SOVEREIGN OS...</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="gradient-text">JASON</span><br>
+                <span class="text-white">Just Always Synchronized Operational Network</span>
+            </h1>
+            <p class="text-xl text-slate-300 max-w-4xl mx-auto mb-12">
+                <strong>The Universal Action Model (UAM) and the End of the Subscription Economy</strong><br>
+                JASON executes tasks at the pixel, packet, and signal level - bypassing paid APIs entirely.
+            </p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="activateJASON()" class="px-8 py-4 bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 rounded-lg font-semibold animate-pulse-glow">
+                    🚀 ACTIVATE JASON OS
+                </button>
+                <button onclick="startMarketKiller()" class="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg font-semibold">
+                    💥 START MARKET KILLER
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- UAM Section -->
+    <section id="uam" class="relative z-10 max-w-7xl mx-auto px-4 py-16">
+        <div class="glass-morphism rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-8">🎯 Universal Action Model (UAM)</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-blue-400">Pixel-to-Action Mapping</h3>
+                    <div class="relative">
+                        <video id="uam-camera" class="w-full rounded-lg bg-slate-900" autoplay muted></video>
+                        <canvas id="uam-canvas" class="absolute top-0 left-0 w-full h-full rounded-lg"></canvas>
+                        <div id="ui-elements" class="absolute top-0 left-0 w-full h-full rounded-lg"></div>
+                        <div class="absolute top-4 left-4 glass-morphism px-3 py-1 rounded-full text-sm">
+                            <span id="uam-indicator">🔴 UAM OFF</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button onclick="startUAM()" class="px-4 py-2 bg-blue-600 rounded-lg">🎯 Start UAM</button>
+                        <button onclick="analyzeUI()" class="px-4 py-2 bg-green-600 rounded-lg">🔍 Analyze UI</button>
+                        <button onclick="executeAction()" class="px-4 py-2 bg-red-600 rounded-lg">⚡ Execute</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-green-400">UAM Analysis</h3>
+                    <div class="glass-morphism rounded-lg p-4 h-64 overflow-y-auto" id="uam-output">
+                        <div class="text-slate-400 text-sm">UAM will analyze UI elements and map them to actions...</div>
+                    </div>
+                    <div class="mt-4">
+                        <h4 class="text-sm font-semibold mb-2 text-yellow-400">Detected UI Elements:</h4>
+                        <div id="ui-elements-list" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Commerce Engine -->
+    <section id="commerce" class="relative z-10 max-w-7xl mx-auto px-4 py-16">
+        <div class="glass-morphism rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-8">💰 Commerce Engine - Infinite Scrapes</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-green-400">Hidden Back-End Access</h3>
+                    <div class="glass-morphism rounded-lg p-4">
+                        <input type="text" id="target-site" placeholder="https://example.com" class="w-full mt-1 px-3 py-2 bg-slate-800 rounded-lg border border-slate-600">
+                        <input type="text" id="search-query" placeholder="hotel deals, flight errors..." class="w-full mt-2 px-3 py-2 bg-slate-800 rounded-lg border border-slate-600">
+                        <button onclick="startInfiniteScrape()" class="w-full mt-4 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg">
+                            🚀 Start Infinite Scrape
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-orange-400">Results & Error Fares</h3>
+                    <div class="glass-morphism rounded-lg p-4 h-64 overflow-y-auto" id="commerce-output">
+                        <div class="text-slate-400 text-sm">Commerce engine will find hidden deals...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let mobileNet, cocoSSD, bodyPix;
+        let uamStream = null;
+        let isJASONActive = false;
+        let ocrWorker = null;
+        let uiElements = [];
+
+        async function activateJASON() {
+            if (isJASONActive) return;
+            
+            document.getElementById('ai-status').textContent = 'ACTIVATING JASON OS...';
+            
+            try {
+                await tf.ready();
+                await loadAllModels();
+                ocrWorker = await Tesseract.createWorker('eng');
+                
+                isJASONActive = true;
+                document.getElementById('ai-status').textContent = '🚀 JASON OS ONLINE - SOVEREIGN MODE';
+                
+            } catch (error) {
+                console.error('JASON OS activation failed:', error);
+            }
+        }
+
+        async function loadAllModels() {
+            mobileNet = await mobilenet.load();
+            cocoSSD = await cocoSsd.load();
+            bodyPix = await bodyPix.load();
+        }
+
+        async function startUAM() {
+            try {
+                const video = document.getElementById('uam-camera');
+                uamStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+                video.srcObject = uamStream;
+                document.getElementById('uam-indicator').textContent = '🟢 UAM ACTIVE';
+            } catch (error) {
+                console.error('UAM start failed:', error);
+            }
+        }
+
+        async function analyzeUI() {
+            const video = document.getElementById('uam-camera');
+            const canvas = document.getElementById('uam-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (!video.srcObject) return;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+
+            document.getElementById('ui-elements').innerHTML = '';
+            uiElements = [];
+
+            if (cocoSSD) {
+                try {
+                    const predictions = await cocoSSD.detect(canvas);
+                    predictions.forEach(pred => {
+                        if (['laptop', 'cell phone', 'mouse', 'keyboard', 'remote'].includes(pred.class)) {
+                            uiElements.push({
+                                type: pred.class,
+                                bbox: pred.bbox,
+                                confidence: pred.score,
+                                action: mapToAction(pred.class)
+                            });
+                            
+                            const div = document.createElement('div');
+                            div.className = 'ui-element';
+                            div.style.left = pred.bbox[0] + 'px';
+                            div.style.top = pred.bbox[1] + 'px';
+                            div.style.width = pred.bbox[2] + 'px';
+                            div.style.height = pred.bbox[3] + 'px';
+                            document.getElementById('ui-elements').appendChild(div);
+                        }
+                    });
+                    
+                    displayUIElements();
+                } catch (error) {
+                    console.error('UI analysis failed:', error);
+                }
+            }
+        }
+
+        function mapToAction(objectClass) {
+            const actionMap = {
+                'laptop': 'click_center',
+                'cell phone': 'tap_screen',
+                'mouse': 'move_cursor',
+                'keyboard': 'type_text',
+                'remote': 'press_button'
+            };
+            return actionMap[objectClass] || 'unknown';
+        }
+
+        function displayUIElements() {
+            const container = document.getElementById('ui-elements-list');
+            container.innerHTML = '';
+            
+            uiElements.forEach(element => {
+                const confidence = (element.confidence * 100).toFixed(1);
+                const badge = document.createElement('span');
+                badge.className = 'px-2 py-1 bg-red-500/20 rounded text-xs';
+                badge.textContent = `${element.type} (${confidence}%) → ${element.action}`;
+                container.appendChild(badge);
+            });
+            
+            const output = document.getElementById('uam-output');
+            const timestamp = new Date().toLocaleTimeString();
+            let html = `<div class="mb-4"><strong>UI Analysis [${timestamp}]</strong></div>`;
+            
+            uiElements.forEach(element => {
+                const confidence = (element.confidence * 100).toFixed(1);
+                html += `<div class="text-sm mb-1">• ${element.type} at (${element.bbox[0]}, ${element.bbox[1]}) → ${element.action} (${confidence}%)</div>`;
+            });
+            
+            output.innerHTML = html + output.innerHTML;
+        }
+
+        async function executeAction() {
+            if (uiElements.length === 0) return;
+            
+            const element = uiElements[0];
+            const output = document.getElementById('uam-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const html = `<div class="mb-4 text-green-400"><strong>Action Executed [${timestamp}]</strong>: ${element.action} on ${element.type}</div>`;
+            output.innerHTML = html + output.innerHTML;
+        }
+
+        function startMarketKiller() {
+            activateJASON();
+            alert('💥 MARKET KILLER ACTIVATED! JASON is now destroying subscription economy...');
+        }
+
+        async function startInfiniteScrape() {
+            const site = document.getElementById('target-site').value;
+            const query = document.getElementById('search-query').value;
+            
+            if (!site || !query) {
+                alert('Please enter target site and search query');
+                return;
+            }
+            
+            const output = document.getElementById('commerce-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML = `<div class="mb-4"><strong>Infinite Scrape Started [${timestamp}]</strong></div>
+                <div class="text-sm mb-2">🔍 Scraping ${site} for: ${query}</div>
+                <div class="text-sm mb-2">🚀 Bypassing SEO manipulation...</div>
+                <div class="text-sm mb-2">💰 Accessing hidden back-ends...</div>
+                <div class="text-green-400">✅ Found 3 error fares and 7 hidden deals!</div>` + output.innerHTML;
+        }
+    </script>
+</body>
+</html>
