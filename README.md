@@ -95,3 +95,34 @@ JASON removes the "Digital Tax" we pay in time and attention. By leveraging the 
 - ✅ Real-time neural visualization
 
 **JASON is REAL and working RIGHT NOW!**
+
+---
+
+## Backend (Local Server)
+
+GitHub Pages can only host the static UI. The **actual app runtime** (job orchestration, trust gating, SSE event stream) runs via the local backend in `server/`.
+
+### Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+Then open:
+
+- `http://127.0.0.1:3001/` (serves `jason-real.html`, falls back to `index-real.html` or `index.html`)
+
+### Key endpoints
+
+- `GET /api/health`
+- `GET /api/events` (Server-Sent Events)
+- `GET /api/activity/logs`
+- `GET /api/trust/status`
+- `POST /api/trust/kill` `{ paused: boolean }`
+- `GET /api/trust/pending`
+- `POST /api/trust/decide` `{ id: string, decision: 'approve'|'reject'|'delay' }`
+- `GET /api/orch/jobs`
+- `POST /api/orch/enqueue` `{ goal: string }`
+- `POST /api/orch/cancel` `{ id: string }`
+- `POST /action/submit_goal` `{ natural_language_goal: string }` (compat endpoint)

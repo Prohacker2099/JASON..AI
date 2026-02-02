@@ -1,12 +1,14 @@
 {
   "name": "jason-sovereign-os",
-  "version": "1.0.0",
-  "description": "JASON: Sovereign Life-Management OS - Static Documentation Site",
-  "main": "index.html",
+  "version": "1.1.0",
+  "description": "JASON: Sovereign Life-Management OS - Static UI + Local Backend",
+  "main": "server/dist/index.js",
   "scripts": {
-    "start": "python -m http.server 8080 || npx serve . -p 8080",
-    "build": "echo 'Static site - no build required'",
-    "deploy": "echo 'Use GitHub Actions for automatic deployment'"
+    "dev": "tsx server/src/index.ts",
+    "build": "tsc -p server/tsconfig.json",
+    "start": "node server/dist/index.js",
+    "start:static": "python -m http.server 8080 || npx serve . -p 8080",
+    "deploy": "echo 'GitHub Pages deploys static only. Use Render/Fly/Railway for backend hosting.'"
   },
   "keywords": [
     "ai",
@@ -14,13 +16,24 @@
     "life-management",
     "uam",
     "digital-autonomy",
-    "static-site"
+    "static-site",
+    "express",
+    "backend"
   ],
   "author": "JASON AI Team",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DaMaker1291/JASON.git"
+    "url": "https://github.com/Prohacker2099/JASON..AI.git"
   },
-  "homepage": "https://DaMaker1291.github.io/JASON"
+  "homepage": "https://Prohacker2099.github.io/JASON..AI",
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.30",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
 }
