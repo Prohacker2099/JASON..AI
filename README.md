@@ -1,62 +1,53 @@
-# JASON: Your Intelligent Life Architect 🌐🤖
+# JASON: Sovereign Life-Management OS
 
 ## Overview
 
-JASON is a revolutionary AI-powered platform that transforms your living environment into an intuitive, proactive, and personalized ecosystem. More than just a smart home system, JASON is your digital companion that learns, adapts, and empowers you.
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js (v18+)
-- npm (v9+)
-
-### Installation
-1. Clone the repository
-```bash
-git clone https://github.com/your-username/jason-ai-architect.git
-cd jason-ai-architect
-```
-
-2. Install dependencies
-```bash
-npm install
-```
-
-3. Start the development server
-```bash
-npm start
-```
+JASON is a revolutionary AI-powered platform that transforms your digital environment into an intuitive, proactive, and personalized ecosystem. More than just a smart assistant, JASON is your sovereign digital companion that learns, adapts, and empowers you with complete control over your digital life.
 
 ## 🌟 Core Features
 
-- **Universal Device Integration**: Seamlessly control and manage devices across different protocols
-- **Proactive AI Personalization**: Learn and anticipate your needs
-- **Intelligent Voice Ecosystem**: Privacy-first voice interactions
-- **Advanced Data Insights**: Optimize your environment and resources
+- **Universal Action Model (UAM)**: Execute real-world actions through pixel analysis (J-Eye) and system integration (Ghost Hand)
+- **Multi-Level Trust Protocol**: Granular permission system with L1-L3 security levels and global kill switch
+- **Autonomous Task Planning**: HTN planner with CPA fallback for complex goal decomposition
+- **Value-Aligned Learning**: Local TensorFlow.js models that learn your preferences without external APIs
+- **Cross-App Integration**: Seamless control of Gmail, Calendar, WhatsApp, Notion, Jira, and more
 
 ## 🛠 Technology Stack
 
-- **Backend**: Node.js, Express, TypeScript
-- **Frontend**: React, TypeScript, SCSS
-- **Device Communication**: MQTT, Axios
-- **Logging**: Winston
+- **Frontend**: Static HTML/CSS/JavaScript with TailwindCSS
+- **Backend**: Node.js/Express/TypeScript (for local deployment)
+- **Database**: SQLite with Prisma ORM
+- **Machine Learning**: TensorFlow.js (local inference only)
+- **Architecture**: BDI Core, HTN Planner, SCRL, DAI Interface
+
+## � Quick Start
+
+### Static Site (GitHub Pages)
+This repository is configured as a static site showcasing the JASON Sovereign OS concept and documentation.
+
+### Local Development
+For full functionality, clone and run the local server:
+
+```bash
+git clone https://github.com/DaMaker1291/JASON.git
+cd JASON
+npm install
+npm start
+```
 
 ## 🔒 Privacy & Security
 
-JASON is built with privacy at its core. All personal data processing happens locally, with strict consent mechanisms and anonymized data handling.
+JASON is built with digital sovereignty at its core:
+- All AI processing happens locally on your machine
+- No external API calls for core functionality
+- Multi-level permission system prevents unauthorized actions
+- Full audit trail of all automated activities
+- AES-256-GCM encryption for sensitive data
 
-## 🌍 Contributing
+## � Vision
 
-We welcome contributions! Please see `CONTRIBUTING.md` for details on our code of conduct and the process for submitting pull requests.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the `LICENSE.md` file for details.
-
-## 🌐 Vision
-
-JASON isn't just a product; it's a vision of technology that truly understands and serves human needs, creating a more intuitive, efficient, and empowering living experience.
+JASON represents a new paradigm in human-AI interaction - one where technology serves human needs without compromising privacy, autonomy, or control. It's not just a product; it's a vision of truly sovereign digital existence.
 
 ---
 
-**Empowering Life, One Intelligent Interaction at a Time** 🌟
+**Empowering Digital Sovereignty, One Intelligent Interaction at a Time** 🌟

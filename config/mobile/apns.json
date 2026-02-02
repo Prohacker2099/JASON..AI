@@ -1,6 +1,0 @@
-{
-  "keyId": "YOUR_APNs_KEY_ID",
-  "teamId": "YOUR_APPLE_TEAM_ID",
-  "keyPath": "/path/to/AuthKey_KEYID.p8",
-  "bundleId": "com.yourdomain.jasonapp"
-}

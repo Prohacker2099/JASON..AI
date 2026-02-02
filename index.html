@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JASON - Sovereign Life-Management OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Space Grotesk', 'system-ui', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace'],
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        .glass-morphism {
+            background: linear-gradient(145deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 50%, rgba(15,23,42,0.95) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(71,85,105,0.4);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white min-h-screen">
+    <!-- Background Effects -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-20 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-1/2 w-96 h-96 bg-green-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="relative z-10 border-b border-slate-800/50 glass-morphism">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="text-2xl font-bold gradient-text">JASON</div>
+                    <div class="hidden md:block text-sm text-slate-400">|</div>
+                    <div class="hidden md:block text-sm text-slate-300">Sovereign Life-Management OS</div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="#overview" class="text-slate-300 hover:text-white transition-colors">Overview</a>
+                    <a href="#uam" class="text-slate-300 hover:text-white transition-colors">UAM</a>
+                    <a href="#permissions" class="text-slate-300 hover:text-white transition-colors">Permissions</a>
+                    <a href="#roadmap" class="text-slate-300 hover:text-white transition-colors">Roadmap</a>
+                    <a href="#modules" class="text-slate-300 hover:text-white transition-colors">Modules</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+        <div class="text-center">
+            <div class="inline-flex items-center px-4 py-2 rounded-full glass-morphism text-sm font-medium text-slate-300 mb-8">
+                <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                Sovereign Mode: Armed
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="gradient-text">The Sovereign</span><br>
+                <span class="text-white">Life-Management OS</span>
+            </h1>
+            <p class="text-xl text-slate-300 max-w-3xl mx-auto mb-12 leading-relaxed">
+                Universal Action Model (UAM): Execute in the real world via pixels (Eye) and signals (Hand). 
+                No subscriptions. No walled gardens. Complete digital sovereignty.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button class="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 animate-pulse-glow">
+                    Initialize JASON
+                </button>
+                <button class="px-8 py-4 glass-morphism rounded-lg font-semibold hover:bg-slate-800/50 transition-all">
+                    View Documentation
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section id="overview" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="glass-morphism rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-8 text-center">System Overview</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">J-Eye</h3>
+                    <p class="text-slate-300">Visual perception system that sees and understands digital interfaces through pixel analysis</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-green-500 to-teal-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Ghost Hand</h3>
+                    <p class="text-slate-300">Hidden execution layer that performs actions through UI automation and system integration</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">BDI Core</h3>
+                    <p class="text-slate-300">Belief-Desire-Intention architecture that enables autonomous decision-making and planning</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- UAM Section -->
+    <section id="uam" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="glass-morphism rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-8">Universal Action Model</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-blue-400">Input Layer</h3>
+                    <ul class="space-y-2 text-slate-300">
+                        <li class="flex items-start"><span class="text-green-400 mr-2">▸</span> Natural language goals</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">▸</span> Visual interface analysis</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">▸</span> System state monitoring</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">▸</span> User preference learning</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-purple-400">Execution Layer</h3>
+                    <ul class="space-y-2 text-slate-300">
+                        <li class="flex items-start"><span class="text-green-400 mr-2">▸</span> HTN task decomposition</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">▸</span> Multi-app coordination</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">▸</span> Error recovery & retry</li>
+                        <li class="flex items-start"><span class="text-green-400 mr-2">▸</span> Real-time adaptation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Permissions Dashboard -->
+    <section id="permissions" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="glass-morphism rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-8">Trust Protocol & Permissions</h2>
+            <div class="grid md:grid-cols-4 gap-6">
+                <div class="glass-morphism rounded-xl p-6 border-l-4 border-green-500">
+                    <h3 class="text-lg font-semibold mb-2 text-green-400">Level 1</h3>
+                    <p class="text-sm text-slate-300 mb-4">Autonomous Actions</p>
+                    <div class="space-y-1 text-xs text-slate-400">
+                        <div>✓ Information gathering</div>
+                        <div>✓ Local file reading</div>
+                        <div>✓ System monitoring</div>
+                    </div>
+                </div>
+                <div class="glass-morphism rounded-xl p-6 border-l-4 border-yellow-500">
+                    <h3 class="text-lg font-semibold mb-2 text-yellow-400">Level 2</h3>
+                    <p class="text-sm text-slate-300 mb-4">Supervised Actions</p>
+                    <div class="space-y-1 text-xs text-slate-400">
+                        <div>✓ File modifications</div>
+                        <div>✓ App control</div>
+                        <div>✓ Network requests</div>
+                    </div>
+                </div>
+                <div class="glass-morphism rounded-xl p-6 border-l-4 border-red-500">
+                    <h3 class="text-lg font-semibold mb-2 text-red-400">Level 3</h3>
+                    <p class="text-sm text-slate-300 mb-4">Human Approval Required</p>
+                    <div class="space-y-1 text-xs text-slate-400">
+                        <div>✓ Purchases/payments</div>
+                        <div>✓ Message sending</div>
+                        <div>✓ Software installation</div>
+                    </div>
+                </div>
+                <div class="glass-morphism rounded-xl p-6 border-l-4 border-purple-500">
+                    <h3 class="text-lg font-semibold mb-2 text-purple-400">Kill Switch</h3>
+                    <p class="text-sm text-slate-300 mb-4">Global Control</p>
+                    <div class="space-y-1 text-xs text-slate-400">
+                        <div>✓ Immediate pause</div>
+                        <div>✓ Emergency stop</div>
+                        <div>✓ Activity audit</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section id="roadmap" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="glass-morphism rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-8">Implementation Roadmap</h2>
+            <div class="space-y-6">
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-sm font-bold">✓</div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-green-400">Phase 1: Foundation (Complete)</h3>
+                        <p class="text-slate-300">Trust Protocol, J-Eye UI, TCG Context Service, Light-mode Resource Management</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-sm font-bold animate-pulse">→</div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-blue-400">Phase 2: Autonomy (In Progress)</h3>
+                        <p class="text-slate-300">ATP Task Planner, DAI Sandbox, Full J-Eye Implementation, Level 3 Gating</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center text-sm font-bold">○</div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-slate-400">Phase 3: Intelligence (Planned)</h3>
+                        <p class="text-slate-300">SCRL Self-Correction, USPT Style Training, Multi-modal Input, Emotion-aware Planning</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center text-sm font-bold">○</div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-slate-500">Phase 4: AGI Integration (Future)</h3>
+                        <p class="text-slate-300">ECM Cross-domain Synthesis, Enterprise Release, Creative Studio, Agent Marketplace</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modules -->
+    <section id="modules" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="glass-morphism rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-8">Core Modules</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="glass-morphism rounded-xl p-6 hover:bg-slate-800/30 transition-all cursor-pointer">
+                    <h3 class="text-lg font-semibold mb-3 text-blue-400">Trust Manager</h3>
+                    <p class="text-sm text-slate-300 mb-3">Multi-level permission system with real-time approval workflows</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-blue-500/20 rounded text-xs">L1-L3 Permissions</span>
+                        <span class="px-2 py-1 bg-blue-500/20 rounded text-xs">SSE Broadcast</span>
+                    </div>
+                </div>
+                <div class="glass-morphism rounded-xl p-6 hover:bg-slate-800/30 transition-all cursor-pointer">
+                    <h3 class="text-lg font-semibold mb-3 text-green-400">HTN Planner</h3>
+                    <p class="text-sm text-slate-300 mb-3">Hierarchical Task Network planner for complex goal decomposition</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-green-500/20 rounded text-xs">Task Decomposition</span>
+                        <span class="px-2 py-1 bg-green-500/20 rounded text-xs">CPA Fallback</span>
+                    </div>
+                </div>
+                <div class="glass-morphism rounded-xl p-6 hover:bg-slate-800/30 transition-all cursor-pointer">
+                    <h3 class="text-lg font-semibold mb-3 text-purple-400">Alignment Model</h3>
+                    <p class="text-sm text-solate-300 mb-3">Value-aligned self-learning using TensorFlow.js local inference</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-purple-500/20 rounded text-xs">TFJS Local</span>
+                        <span class="px-2 py-1 bg-purple-500/20 rounded text-xs">Q-learning</span>
+                    </div>
+                </div>
+                <div class="glass-morphism rounded-xl p-6 hover:bg-slate-800/30 transition-all cursor-pointer">
+                    <h3 class="text-lg font-semibold mb-3 text-yellow-400">DAI Interface</h3>
+                    <p class="text-sm text-slate-300 mb-3">Digital Agent Interface sandbox with allow-list enforcement</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-yellow-500/20 rounded text-xs">Sandbox</span>
+                        <span class="px-2 py-1 bg-yellow-500/20 rounded text-xs">Web Automation</span>
+                    </div>
+                </div>
+                <div class="glass-morphism rounded-xl p-6 hover:bg-slate-800/30 transition-all cursor-pointer">
+                    <h3 class="text-lg font-semibold mb-3 text-red-400">SCRL Engine</h3>
+                    <p class="text-sm text-slate-300 mb-3">Self-Correction & Reflection Loop for continuous improvement</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-red-500/20 rounded text-xs">Post-exec Review</span>
+                        <span class="px-2 py-1 bg-red-500/20 rounded text-xs">Model Adjustment</span>
+                    </div>
+                </div>
+                <div class="glass-morphism rounded-xl p-6 hover:bg-slate-800/30 transition-all cursor-pointer">
+                    <h3 class="text-lg font-semibold mb-3 text-teal-400">TCG Service</h3>
+                    <p class="text-sm text-slate-300 mb-3">Temporal Context Graph for persistent memory and context synthesis</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-teal-500/20 rounded text-xs">Context Graph</span>
+                        <span class="px-2 py-1 bg-teal-500/20 rounded text-xs">Prisma Models</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-slate-800/50 glass-morphism mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-slate-400 text-sm mb-4 md:mb-0">
+                    © 2026 JASON - Sovereign Life-Management OS. All rights reserved.
+                </div>
+                <div class="flex space-x-6 text-sm">
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">Privacy</a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">Security</a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">Documentation</a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-slate-900/95');
+            } else {
+                nav.classList.remove('bg-slate-900/95');
+            }
+        });
+    </script>
+</body>
+</html>

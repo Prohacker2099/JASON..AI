@@ -1,7 +1,0 @@
-{
-    "name": "TestDir",
-    "description": "List directory",
-    "commands": [
-        "dir"
-    ]
-}

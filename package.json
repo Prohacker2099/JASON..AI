@@ -1,94 +1,26 @@
 {
-  "name": "jason-ai-architect",
+  "name": "jason-sovereign-os",
   "version": "1.0.0",
-  "description": "Universal AI-Powered Device and Knowledge Integration Platform",
-  "main": "server/index.ts",
+  "description": "JASON: Sovereign Life-Management OS - Static Documentation Site",
+  "main": "index.html",
   "scripts": {
-    "start": "npx tsx unified-startup.js",
-    "dev": "npx tsx unified-startup.js",
-    "server": "npx tsx unified-startup.js",
-    "client": "cd client && npm start",
-    "build": "npm run build:server && npm run build:client",
-    "build:server": "cd server && npx tsc",
-    "build:client": "cd client && npm run build",
-    "test": "npm run test:server && npm run test:client",
-    "test:server": "cd server && npm test",
-    "test:client": "cd client && npm test",
-    "test:hands": "node scripts/tests/hands-smoke.mjs",
-    "test:http": "node scripts/tests/http-latency.mjs",
-    "test:ai": "node scripts/tests/ai-trainer-benchmark.mjs",
-    "test:page": "node scripts/tests/page-load.mjs",
-    "test:travel": "node scripts/tests/travel-cambodia-smoke.mjs",
-    "test:perf": "npm run -s test:http && npm run -s test:ai && npm run -s test:page",
-    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,scss,css}\"",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
-    "clean": "rimraf dist node_modules server/node_modules client/node_modules",
-    "health": "node -e \"console.log('JASON AI Health Check: All systems operational! 🚀')\""
+    "start": "python -m http.server 8080 || npx serve . -p 8080",
+    "build": "echo 'Static site - no build required'",
+    "deploy": "echo 'Use GitHub Actions for automatic deployment'"
   },
   "keywords": [
     "ai",
-    "iot",
-    "smart-home",
-    "device-integration",
-    "machine-learning"
+    "sovereign-os",
+    "life-management",
+    "uam",
+    "digital-autonomy",
+    "static-site"
   ],
   "author": "JASON AI Team",
   "license": "MIT",
-  "dependencies": {
-    "@prisma/client": "^6.19.0",
-    "@tailwindcss/typography": "^0.5.16",
-    "@tensorflow/tfjs": "^4.22.0",
-    "@tensorflow/tfjs-node": "^4.20.0",
-    "axios": "^1.x",
-    "dotenv": "^16.x",
-    "express": "^4.x",
-    "fast-csv": "^5.x",
-    "mailparser": "^3.9.0",
-    "moment": "^2.x",
-    "mqtt": "^5.x",
-    "multer": "^1.x",
-    "node-fetch": "^3.x",
-    "node-ical": "^0.17.x",
-    "nodemailer": "^7.0.11",
-    "prisma": "^6.13.0",
-    "puppeteer": "^21.x",
-    "react": "^18.x",
-    "react-dom": "^18.x",
-    "react-router-dom": "^6.x",
-    "rimraf": "^5.x",
-    "serialport": "^12.x",
-    "sqlite": "^5.x",
-    "sqlite3": "^5.x",
-    "tailwindcss-animate": "^1.0.7",
-    "winston": "^3.13.0",
-    "ws": "^8.x"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DaMaker1291/JASON.git"
   },
-  "devDependencies": {
-    "@types/express": "^4.17.23",
-    "@types/node": "^20.x",
-    "@types/react": "^18.3.23",
-    "@types/react-dom": "^18.3.7",
-    "@types/serialport": "^8.x",
-    "@types/ws": "^8.18.1",
-    "concurrently": "^8.x",
-    "cross-env": "^10.0.0",
-    "puppeteer": "^21.x",
-    "react-scripts": "^5.0.1",
-    "sass": "^1.90.0",
-    "tsx": "^4.x",
-    "typescript": "^5.x"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "homepage": "https://DaMaker1291.github.io/JASON"
 }

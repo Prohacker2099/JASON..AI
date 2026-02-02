@@ -1,7 +1,0 @@
-2026/01/23-08:43:19.758 71b0 Reusing MANIFEST C:\Users\supro\Downloads\JASON_TheOmnipotentAIArchitect\server\data\playwright\flight_scraper\Default\IndexedDB\https_www.kayak.com_0.indexeddb.leveldb/MANIFEST-000001
-2026/01/23-08:43:19.761 71b0 Recovering log #4
-2026/01/23-08:43:19.763 71b0 Reusing old log C:\Users\supro\Downloads\JASON_TheOmnipotentAIArchitect\server\data\playwright\flight_scraper\Default\IndexedDB\https_www.kayak.com_0.indexeddb.leveldb/000004.log 
-2026/01/23-08:43:20.219 515c Level-0 table #8: started
-2026/01/23-08:43:20.256 515c Level-0 table #8: 541 bytes OK
-2026/01/23-08:43:20.267 515c Delete type=0 #4
-2026/01/23-08:43:20.270 515c Manual compaction at level-0 from '\x00\x02\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x03\x00\x00\x00' @ 0 : 0; will stop at (end)
