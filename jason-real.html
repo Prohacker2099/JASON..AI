@@ -122,7 +122,7 @@
                 <div>
                     <h3 class="text-xl font-semibold mb-4 text-orange-400">Results & Error Fares</h3>
                     <div class="glass-morphism rounded-lg p-4 h-64 overflow-y-auto" id="commerce-output">
-                        <div class="text-slate-400 text-sm">Commerce engine will find hidden deals...</div>
+                        <div class="text-slate-400 text-sm">Results appear here after a real backend fetch.</div>
                     </div>
                 </div>
             </div>
@@ -261,7 +261,7 @@
 
         function startMarketKiller() {
             activateJASON();
-            alert('💥 MARKET KILLER ACTIVATED! JASON is now destroying subscription economy...');
+            alert('Market-killer mode enabled. Run the local backend (npm run dev) for real operations.');
         }
 
         async function startInfiniteScrape() {
@@ -275,11 +275,52 @@
             
             const output = document.getElementById('commerce-output');
             const timestamp = new Date().toLocaleTimeString();
-            output.innerHTML = `<div class="mb-4"><strong>Infinite Scrape Started [${timestamp}]</strong></div>
-                <div class="text-sm mb-2">🔍 Scraping ${site} for: ${query}</div>
-                <div class="text-sm mb-2">🚀 Bypassing SEO manipulation...</div>
-                <div class="text-sm mb-2">💰 Accessing hidden back-ends...</div>
-                <div class="text-green-400">✅ Found 3 error fares and 7 hidden deals!</div>` + output.innerHTML;
+            output.innerHTML = `<div class="mb-4"><strong>Fetch started [${timestamp}]</strong></div>
+                <div class="text-sm mb-2">URL: ${site}</div>
+                <div class="text-sm mb-2">Query: ${query}</div>
+                <div class="text-sm text-slate-400">Calling backend /api/commerce/scrape ...</div>` + output.innerHTML;
+
+            try {
+                const r = await fetch('/api/commerce/scrape', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: site, query })
+                });
+                const data = await r.json();
+
+                if (!r.ok || !data || data.ok !== true) {
+                    const err = (data && (data.error || data.raw)) ? (data.error || data.raw) : ('HTTP ' + r.status);
+                    output.innerHTML = `<div class="mb-4 text-red-400"><strong>Fetch failed</strong>: ${String(err)}</div>` + output.innerHTML;
+                    output.innerHTML = `<div class="text-slate-400 text-sm">Tip: backend restricts hosts by default. Set ALLOWED_HOSTS env var to include the domain.</div>` + output.innerHTML;
+                    return;
+                }
+
+                const title = data.title ? String(data.title) : '(no title)';
+                const bytes = typeof data.fetchedBytes === 'number' ? data.fetchedBytes : null;
+                const matches = Array.isArray(data.matches) ? data.matches : [];
+
+                let html = `<div class="mb-4 text-green-400"><strong>Fetch OK</strong></div>`;
+                html += `<div class="text-sm mb-1">Title: ${title}</div>`;
+                html += `<div class="text-sm mb-3">Bytes: ${bytes !== null ? bytes : 'n/a'}</div>`;
+                html += `<div class="text-sm mb-2"><strong>Matches (${matches.length}):</strong></div>`;
+                html += `<div class="text-sm" style="display:grid;gap:6px;">`;
+
+                for (const m of matches) {
+                    const text = m && m.text ? String(m.text) : '';
+                    const href = m && m.href ? String(m.href) : '';
+                    if (!text) continue;
+                    if (href) {
+                        html += `<a href="${href}" target="_blank" rel="noreferrer" style="color:#93c5fd;text-decoration:none;font-weight:700;">${text}</a>`;
+                    } else {
+                        html += `<div>${text}</div>`;
+                    }
+                }
+                html += `</div>`;
+
+                output.innerHTML = html + output.innerHTML;
+            } catch (e) {
+                output.innerHTML = `<div class="mb-4 text-red-400"><strong>Fetch error</strong>: ${String(e)}</div>` + output.innerHTML;
+            }
         }
     </script>
 </body>
