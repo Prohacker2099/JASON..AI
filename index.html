@@ -291,6 +291,7 @@
         const BACKEND_URL = 'https://jason-backend.up.railway.app';
         let eventSource = null;
         let startTime = Date.now();
+        let backendConnected = false;
 
         // Utility
         function log(type, msg, level = 'info') {
@@ -334,14 +335,30 @@
         async function checkHealth() {
             try {
                 const r = await api('/api/health');
+                backendConnected = true;
                 document.getElementById('health-status').textContent = 'OK';
                 document.getElementById('health-status-dot').className = 'status-dot status-online';
                 log('health', 'Backend online', 'success');
             } catch (e) {
-                document.getElementById('health-status').textContent = `Error: ${e.message}`;
+                backendConnected = false;
+                document.getElementById('health-status').textContent = 'Backend offline';
                 document.getElementById('health-status-dot').className = 'status-dot status-offline';
                 log('health', `Backend offline: ${e.message}`, 'error');
+                showBackendOfflineWarning();
             }
+        }
+
+        function showBackendOfflineWarning() {
+            const warning = document.createElement('div');
+            warning.className = 'fixed top-4 right-4 bg-red-500/90 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm';
+            warning.innerHTML = `
+                <div class="font-semibold mb-2">Backend Offline</div>
+                <div class="text-sm">The backend is not deployed. Run locally:</div>
+                <div class="text-xs font-mono mt-2 bg-black/30 p-2 rounded">npm run dev</div>
+                <button onclick="this.parentElement.remove()" class="mt-2 bg-white/20 px-2 py-1 rounded text-sm">Dismiss</button>
+            `;
+            document.body.appendChild(warning);
+            setTimeout(() => warning.remove(), 10000);
         }
 
         async function checkDesktop() {
@@ -474,6 +491,10 @@
 
         // Web Automation
         async function createWebSession() {
+            if (!backendConnected) {
+                log('web', 'Backend not connected', 'error');
+                return;
+            }
             try {
                 const r = await api('/api/web/session/create', {
                     method: 'POST',
