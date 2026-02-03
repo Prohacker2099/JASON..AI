@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JASON – Control Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: #e2e8f0; }
+        .glass { background: rgba(30,41,59,0.5); backdrop-filter: blur(10px); border: 1px solid rgba(148,163,184,0.1); }
+    </style>
+</head>
+<body class="min-h-screen p-4">
+    <div class="max-w-6xl mx-auto space-y-6">
+        <header class="text-center">
+            <h1 class="text-4xl font-bold text-orange-400 mb-2">JASON Control Panel</h1>
+            <p class="text-slate-400">Real backend automation (web + desktop)</p>
+            <p class="text-sm text-slate-500">Backend: <span id="backend-url">https://jason-backend.up.railway.app</span></p>
+        </header>
+
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Status -->
+            <div class="glass rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 text-blue-400">Backend Status</h2>
+                <div class="space-y-2 text-sm">
+                    <div>Health: <span id="health-status" class="text-slate-300">checking...</span></div>
+                    <div>SSE: <span id="sse-status" class="text-slate-300">disconnected</span></div>
+                    <div>Desktop Agent: <span id="desktop-status" class="text-slate-300">unknown</span></div>
+                </div>
+                <button onclick="checkHealth()" class="mt-4 px-4 py-2 bg-blue-600 rounded-lg">Check Health</button>
+            </div>
+
+            <!-- Trust Gate -->
+            <div class="glass rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 text-red-400">Trust Gate</h2>
+                <div class="space-y-2">
+                    <button onclick="setTrustPaused(true)" class="px-4 py-2 bg-red-600 rounded-lg">Pause High-Risk</button>
+                    <button onclick="setTrustPaused(false)" class="px-4 py-2 bg-green-600 rounded-lg">Unpause</button>
+                    <button onclick="refreshTrust()" class="px-4 py-2 bg-slate-700 rounded-lg">Refresh</button>
+                </div>
+                <div id="trust-status" class="mt-4 text-sm text-slate-300">unknown</div>
+                <div id="trust-prompts" class="mt-2 space-y-2"></div>
+            </div>
+
+            <!-- Web Automation -->
+            <div class="glass rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 text-green-400">Web Automation</h2>
+                <div class="space-y-2">
+                    <button onclick="createWebSession()" class="px-4 py-2 bg-green-600 rounded-lg">Create Session</button>
+                    <select id="web-session" class="w-full p-2 bg-slate-700 rounded"></select>
+                    <button onclick="closeWebSession()" class="px-4 py-2 bg-red-700 rounded-lg">Close Session</button>
+                </div>
+                <div class="mt-4 space-y-2">
+                    <input type="text" id="web-url" placeholder="https://example.com" class="w-full p-2 bg-slate-700 rounded">
+                    <button onclick="navigateWeb()" class="px-4 py-2 bg-blue-600 rounded-lg">Navigate</button>
+                    <button onclick="screenshotWeb()" class="px-4 py-2 bg-purple-600 rounded-lg">Screenshot</button>
+                </div>
+                <div id="web-result" class="mt-4 text-sm text-slate-300"></div>
+                <img id="web-screenshot" class="mt-2 max-w-full rounded hidden" />
+            </div>
+
+            <!-- Desktop Control -->
+            <div class="glass rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 text-yellow-400">Desktop Control</h2>
+                <div class="space-y-2">
+                    <button onclick="desktopScreenshot()" class="px-4 py-2 bg-yellow-600 rounded-lg">Screenshot</button>
+                    <button onclick="desktopClick()" class="px-4 py-2 bg-orange-600 rounded-lg">Click (100,100)</button>
+                    <button onclick="desktopType()" class="px-4 py-2 bg-teal-600 rounded-lg">Type Hello</button>
+                </div>
+                <div id="desktop-result" class="mt-4 text-sm text-slate-300"></div>
+                <img id="desktop-screenshot" class="mt-2 max-w-full rounded hidden" />
+            </div>
+        </section>
+
+        <!-- Live Logs -->
+        <section class="glass rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4 text-purple-400">Live Logs</h2>
+            <div id="logs" class="h-64 overflow-y-auto font-mono text-xs space-y-1"></div>
+        </section>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://jason-backend.up.railway.app';
+        let eventSource = null;
+
+        // Utility
+        function log(type, msg) {
+            const logs = document.getElementById('logs');
+            const ts = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.textContent = `[${ts}] ${type}: ${msg}`;
+            logs.prepend(div);
+        }
+
+        // Backend calls
+        async function api(path, opts = {}) {
+            const res = await fetch(`${BACKEND_URL}${path}`, opts);
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || (data && data.ok === false)) {
+                throw new Error(data?.error || `HTTP ${res.status}`);
+            }
+            return data;
+        }
+
+        // Status
+        async function checkHealth() {
+            try {
+                const r = await api('/api/health');
+                document.getElementById('health-status').textContent = 'OK';
+                log('health', 'OK');
+            } catch (e) {
+                document.getElementById('health-status').textContent = `Error: ${e.message}`;
+                log('health', `Error: ${e.message}`);
+            }
+        }
+
+        async function checkDesktop() {
+            try {
+                const r = await api('/api/desktop/status');
+                document.getElementById('desktop-status').textContent = r.configured ? 'Configured' : 'Not configured';
+                log('desktop', r.configured ? 'Configured' : 'Not configured');
+            } catch (e) {
+                document.getElementById('desktop-status').textContent = `Error: ${e.message}`;
+                log('desktop', `Error: ${e.message}`);
+            }
+        }
+
+        // SSE
+        function connectSSE() {
+            if (eventSource) eventSource.close();
+            try {
+                eventSource = new EventSource(`${BACKEND_URL}/api/events`);
+                eventSource.onopen = () => {
+                    document.getElementById('sse-status').textContent = 'connected';
+                    log('sse', 'connected');
+                };
+                eventSource.onerror = () => {
+                    document.getElementById('sse-status').textContent = 'error';
+                    log('sse', 'error');
+                };
+                const types = ['system', 'ping', 'trust:prompt', 'trust:decision', 'orch:job', 'web:session', 'web:session_closed', 'web:browser', 'desktop:command'];
+                types.forEach(t => {
+                    eventSource.addEventListener(t, (ev) => {
+                        let payload = {};
+                        try { payload = JSON.parse(ev.data || '{}'); } catch { payload = { raw: ev.data }; }
+                        log(t, JSON.stringify(payload));
+                        if (t === 'trust:prompt' || t === 'trust:decision') refreshTrust();
+                        if (t === 'web:session' || t === 'web:session_closed') refreshWebSessions();
+                    });
+                });
+            } catch (e) {
+                document.getElementById('sse-status').textContent = `Error: ${e.message}`;
+                log('sse', `Error: ${e.message}`);
+            }
+        }
+
+        // Trust Gate
+        async function setTrustPaused(paused) {
+            try {
+                await api('/api/trust/kill', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paused })
+                });
+                log('trust', paused ? 'paused' : 'unpaused');
+                refreshTrust();
+            } catch (e) {
+                log('trust', `Error: ${e.message}`);
+            }
+        }
+
+        async function refreshTrust() {
+            try {
+                const r = await api('/api/trust/pending');
+                document.getElementById('trust-status').textContent = r.paused ? 'paused' : 'active';
+                const promptsDiv = document.getElementById('trust-prompts');
+                promptsDiv.innerHTML = '';
+                if (r.prompts && r.prompts.length > 0) {
+                    r.prompts.forEach(p => {
+                        const div = document.createElement('div');
+                        div.className = 'p-2 bg-slate-700 rounded text-xs';
+                        div.innerHTML = `
+                            <div>${p.reason || p.goal}</div>
+                            <div class="flex gap-2 mt-1">
+                                <button onclick="decidePrompt('${p.id}', 'approve')" class="px-2 py-1 bg-green-600 rounded">Approve</button>
+                                <button onclick="decidePrompt('${p.id}', 'reject')" class="px-2 py-1 bg-red-600 rounded">Reject</button>
+                                <button onclick="decidePrompt('${p.id}', 'delay')" class="px-2 py-1 bg-yellow-600 rounded">Delay</button>
+                            </div>
+                        `;
+                        promptsDiv.appendChild(div);
+                    });
+                }
+            } catch (e) {
+                log('trust', `Error: ${e.message}`);
+            }
+        }
+
+        async function decidePrompt(id, decision) {
+            try {
+                await api('/api/trust/decide', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, decision })
+                });
+                log('trust', `Decided ${id}: ${decision}`);
+                refreshTrust();
+            } catch (e) {
+                log('trust', `Error: ${e.message}`);
+            }
+        }
+
+        // Web Automation
+        async function createWebSession() {
+            try {
+                const r = await api('/api/web/session/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: '{}'
+                });
+                log('web', `Session created: ${r.id}`);
+                refreshWebSessions();
+            } catch (e) {
+                log('web', `Error: ${e.message}`);
+            }
+        }
+
+        async function refreshWebSessions() {
+            try {
+                const r = await api('/api/web/sessions');
+                const sel = document.getElementById('web-session');
+                sel.innerHTML = '';
+                r.sessions?.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = `${s.id} (${new Date(s.createdAt).toLocaleTimeString()})`;
+                    sel.appendChild(opt);
+                });
+            } catch (e) {
+                log('web', `Error: ${e.message}`);
+            }
+        }
+
+        async function closeWebSession() {
+            const sel = document.getElementById('web-session');
+            const id = sel.value;
+            if (!id) return;
+            try {
+                await api('/api/web/session/close', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                log('web', `Session closed: ${id}`);
+                refreshWebSessions();
+            } catch (e) {
+                log('web', `Error: ${e.message}`);
+            }
+        }
+
+        async function navigateWeb() {
+            const sessionId = document.getElementById('web-session').value;
+            const url = document.getElementById('web-url').value;
+            if (!sessionId || !url) return;
+            try {
+                const r = await api('/api/orch/enqueue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal: `web:navigate ${sessionId} ${url}` })
+                });
+                log('web', `Enqueued navigate: ${url}`);
+            } catch (e) {
+                log('web', `Error: ${e.message}`);
+            }
+        }
+
+        async function screenshotWeb() {
+            const sessionId = document.getElementById('web-session').value;
+            if (!sessionId) return;
+            try {
+                const r = await api('/api/orch/enqueue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal: `web:screenshot ${sessionId}` })
+                });
+                log('web', 'Enqueued screenshot');
+            } catch (e) {
+                log('web', `Error: ${e.message}`);
+            }
+        }
+
+        // Desktop Control
+        async function desktopScreenshot() {
+            try {
+                const r = await api('/api/orch/enqueue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal: 'desktop:screenshot' })
+                });
+                log('desktop', 'Enqueued screenshot');
+            } catch (e) {
+                log('desktop', `Error: ${e.message}`);
+            }
+        }
+
+        async function desktopClick() {
+            try {
+                const r = await api('/api/orch/enqueue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal: 'desktop:click 100 100 left 1' })
+                });
+                log('desktop', 'Enqueued click (100,100)');
+            } catch (e) {
+                log('desktop', `Error: ${e.message}`);
+            }
+        }
+
+        async function desktopType() {
+            try {
+                const r = await api('/api/orch/enqueue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal: 'desktop:type Hello' })
+                });
+                log('desktop', 'Enqueued type Hello');
+            } catch (e) {
+                log('desktop', `Error: ${e.message}`);
+            }
+        }
+
+        // Init
+        window.addEventListener('load', () => {
+            checkHealth();
+            checkDesktop();
+            connectSSE();
+            refreshTrust();
+            refreshWebSessions();
+        });
+    </script>
+</body>
+</html>
