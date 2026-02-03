@@ -85,6 +85,160 @@ type WebSession = {
   browserType: 'chromium'
   page: any
   context: any
+  cookies: Array<{ name: string; value: string; domain?: string; path?: string; expires?: number; httpOnly?: boolean; secure?: boolean; sameSite?: 'Lax'|'Strict'|'None' }>
+}
+
+type ConsentPrompt = {
+  id: string
+  sessionId: string
+  url: string
+  detectedAt: number
+  selectors: string[]
+  handled: boolean
+  handledAt?: number
+  method?: 'accept' | 'reject' | 'dismiss'
+}
+
+const consentState = {
+  prompts: new Map<string, ConsentPrompt>(),
+}
+
+function isLikelyConsentDialog(url: string, page: any): Promise<string[]> {
+  return new Promise((resolve) => {
+    const commonSelectors = [
+      'button[data-testid="accept-all"]',
+      'button[data-cy="accept-all"]',
+      'button[id*="accept"]',
+      'button[class*="accept"]',
+      'button[aria-label*="accept"]',
+      'button[data-testid*="consent"]',
+      'button[id*="consent"]',
+      'button[class*="consent"]',
+      'button[aria-label*="consent"]',
+      'button[data-testid*="cookie"]',
+      'button[id*="cookie"]',
+      'button[class*="cookie"]',
+      'button[aria-label*="cookie"]',
+      'div[role="dialog"] button',
+      '.cookie-banner button',
+      '#cookie-banner button',
+      '.consent-banner button',
+      '#consent-banner button',
+    ]
+    const found: string[] = []
+    const checks = commonSelectors.map((sel: string) => page.locator(sel).isVisible().then((v: boolean) => v ? found.push(sel) : Promise.resolve()))
+    Promise.all(checks).then(() => resolve(found))
+  })
+}
+
+async function handleConsentDialog(page: any, method: 'accept' | 'reject' | 'dismiss' = 'accept') {
+  const acceptSelectors = [
+    'button[data-testid="accept-all"]',
+    'button[data-cy="accept-all"]',
+    'button[id*="accept-all"]',
+    'button[class*="accept-all"]',
+    'button[aria-label*="accept-all"]',
+    'button[data-testid*="accept"]',
+    'button[id*="accept"]',
+    'button[class*="accept"]',
+    'button[aria-label*="accept"]',
+    '.cookie-banner button:has-text("Accept")',
+    '#cookie-banner button:has-text("Accept")',
+    '.consent-banner button:has-text("Accept")',
+    '#consent-banner button:has-text("Accept")',
+    'div[role="dialog"] button:has-text("Accept")',
+    'button:has-text("Accept All")',
+    'button:has-text("Accept")',
+  ]
+  const rejectSelectors = [
+    'button[data-testid="reject-all"]',
+    'button[data-cy="reject-all"]',
+    'button[id*="reject-all"]',
+    'button[class*="reject-all"]',
+    'button[aria-label*="reject-all"]',
+    'button:has-text("Reject All")',
+    'button:has-text("Reject")',
+  ]
+  const dismissSelectors = [
+    'button[aria-label="Close"]',
+    'button[title="Close"]',
+    'button:has-text("Close")',
+    'button:has-text("Dismiss")',
+    'button:has-text("✕")',
+    'button:has-text("×")',
+  ]
+
+  const candidates = method === 'accept' ? acceptSelectors : method === 'reject' ? rejectSelectors : dismissSelectors
+  for (const sel of candidates) {
+    try {
+      const el = page.locator(sel).first()
+      if (await el.isVisible({ timeout: 1000 })) {
+        await el.click({ timeout: 3000 })
+        return true
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return false
+}
+
+async function refreshCookiesForSession(session: WebSession) {
+  try {
+    const cookies = await session.context.cookies()
+    session.cookies = cookies.map((c: any) => ({
+      name: c.name,
+      value: c.value,
+      domain: c.domain,
+      path: c.path,
+      expires: c.expires,
+      httpOnly: c.httpOnly,
+      secure: c.secure,
+      sameSite: c.sameSite,
+    }))
+  } catch {
+    session.cookies = []
+  }
+}
+
+async function setCookiesForSession(session: WebSession, cookies: any[]) {
+  try {
+    await session.context.addCookies(cookies)
+    await refreshCookiesForSession(session)
+  } catch {
+    // ignore
+  }
+}
+
+function getConsentPrompt(sessionId: string, url: string): ConsentPrompt | undefined {
+  for (const p of consentState.prompts.values()) {
+    if (p.sessionId === sessionId && p.url === url && !p.handled) return p
+  }
+  return undefined
+}
+
+function addConsentPrompt(sessionId: string, url: string, selectors: string[]): ConsentPrompt {
+  const id = rid('consent')
+  const prompt: ConsentPrompt = {
+    id,
+    sessionId,
+    url,
+    detectedAt: Date.now(),
+    selectors,
+    handled: false,
+  }
+  consentState.prompts.set(id, prompt)
+  pushActivity('web:consent_prompt', { id, sessionId, url, selectors })
+  return prompt
+}
+
+function markConsentHandled(id: string, method: 'accept' | 'reject' | 'dismiss') {
+  const p = consentState.prompts.get(id)
+  if (!p) return
+  p.handled = true
+  p.handledAt = Date.now()
+  p.method = method
+  pushActivity('web:consent_handled', { id, method })
 }
 
 const DEFAULT_ALLOWED_HOSTS = new Set(['localhost', '127.0.0.1'])
@@ -206,7 +360,7 @@ async function createWebSession(): Promise<WebSession> {
   const context = await browser.newContext({ viewport: { width: 1280, height: 720 } })
   const page = await context.newPage()
   const id = rid('web')
-  const s: WebSession = { id, createdAt: Date.now(), lastUsedAt: Date.now(), browserType: 'chromium', page, context }
+  const s: WebSession = { id, createdAt: Date.now(), lastUsedAt: Date.now(), browserType: 'chromium', page, context, cookies: [] }
   webState.sessions.set(id, s)
   pushActivity('web:session', { id, createdAt: s.createdAt })
   return s
@@ -494,6 +648,86 @@ app.post('/api/web/session/close', async (req, res) => {
   if (!id) return res.status(400).json({ ok: false, error: 'missing_id' })
   await closeSession(id)
   res.json({ ok: true })
+})
+
+app.get('/api/web/session/:id/cookies', async (req, res) => {
+  const id = String(req.params.id || '').trim()
+  if (!id) return res.status(400).json({ ok: false, error: 'missing_id' })
+  try {
+    const s = getSessionOrThrow(id)
+    await refreshCookiesForSession(s)
+    res.json({ ok: true, cookies: s.cookies })
+  } catch (e: any) {
+    res.status(400).json({ ok: false, error: e?.message || String(e) })
+  }
+})
+
+app.post('/api/web/session/:id/cookies', async (req, res) => {
+  const id = String(req.params.id || '').trim()
+  const cookies = Array.isArray(req.body?.cookies) ? req.body.cookies : []
+  if (!id) return res.status(400).json({ ok: false, error: 'missing_id' })
+  try {
+    const s = getSessionOrThrow(id)
+    await setCookiesForSession(s, cookies)
+    res.json({ ok: true, cookies: s.cookies })
+  } catch (e: any) {
+    res.status(400).json({ ok: false, error: e?.message || String(e) })
+  }
+})
+
+app.get('/api/web/session/:id/consent', async (req, res) => {
+  const id = String(req.params.id || '').trim()
+  if (!id) return res.status(400).json({ ok: false, error: 'missing_id' })
+  try {
+    const s = getSessionOrThrow(id)
+    const url = await s.page.url()
+    const prompt = getConsentPrompt(id, url)
+    if (!prompt) {
+      const selectors = await isLikelyConsentDialog(url, s.page)
+      if (selectors.length > 0) {
+        addConsentPrompt(id, url, selectors)
+      }
+    }
+    const prompts = Array.from(consentState.prompts.values()).filter(p => p.sessionId === id && !p.handled)
+    res.json({ ok: true, prompts })
+  } catch (e: any) {
+    res.status(400).json({ ok: false, error: e?.message || String(e) })
+  }
+})
+
+app.post('/api/web/session/:id/consent/:promptId/handle', async (req, res) => {
+  const id = String(req.params.id || '').trim()
+  const promptId = String(req.params.promptId || '').trim()
+  const method = String(req.body?.method || 'accept').trim().toLowerCase()
+  if (!id || !promptId) return res.status(400).json({ ok: false, error: 'missing_ids' })
+  if (!['accept', 'reject', 'dismiss'].includes(method)) return res.status(400).json({ ok: false, error: 'invalid_method' })
+  try {
+    const s = getSessionOrThrow(id)
+    const prompt = consentState.prompts.get(promptId)
+    if (!prompt || prompt.sessionId !== id || prompt.handled) return res.status(404).json({ ok: false, error: 'prompt_not_found' })
+    const handled = await handleConsentDialog(s.page, method as 'accept' | 'reject' | 'dismiss')
+    if (!handled) return res.status(400).json({ ok: false, error: 'consent_dialog_not_found' })
+    markConsentHandled(promptId, method as 'accept' | 'reject' | 'dismiss')
+    res.json({ ok: true, method })
+  } catch (e: any) {
+    res.status(400).json({ ok: false, error: e?.message || String(e) })
+  }
+})
+
+app.post('/api/web/session/:id/consent/detect', async (req, res) => {
+  const id = String(req.params.id || '').trim()
+  if (!id) return res.status(400).json({ ok: false, error: 'missing_id' })
+  try {
+    const s = getSessionOrThrow(id)
+    const url = await s.page.url()
+    const selectors = await isLikelyConsentDialog(url, s.page)
+    if (selectors.length > 0) {
+      addConsentPrompt(id, url, selectors)
+    }
+    res.json({ ok: true, url, selectors })
+  } catch (e: any) {
+    res.status(400).json({ ok: false, error: e?.message || String(e) })
+  }
 })
 
 app.get('/api/desktop/status', (_req, res) => {
@@ -786,6 +1020,93 @@ async function runJob(id: string) {
       }
 
       throw new Error('unsupported_web_command')
+    }
+
+    if (lower.startsWith('web:cookies')) {
+      const parts = g.split(' ')
+      const cmd = (parts[0] || '').trim().toLowerCase()
+      const sessionId = (parts[1] || '').trim()
+      if (!sessionId) throw new Error('missing_session_id')
+      const s = getSessionOrThrow(sessionId)
+
+      if (cmd === 'web:cookies:list') {
+        await refreshCookiesForSession(s)
+        const j2 = state.jobs.get(id)
+        if (!j2) return
+        if (j2.status === 'cancelled') return
+        j2.status = 'completed'
+        j2.result = { ok: true, kind: 'web:cookies:list', sessionId, cookies: s.cookies }
+        pushActivity('orch:job', j2)
+        return
+      }
+
+      if (cmd === 'web:cookies:set') {
+        const rest = parts.slice(2).join(' ').trim()
+        const cookiesJson = rest.startsWith('[') ? rest : `[${rest}]`
+        let cookies: any[] = []
+        try {
+          cookies = JSON.parse(cookiesJson)
+          if (!Array.isArray(cookies)) throw new Error('not_array')
+        } catch {
+          throw new Error('invalid_cookies_json')
+        }
+        await setCookiesForSession(s, cookies)
+        const j2 = state.jobs.get(id)
+        if (!j2) return
+        if (j2.status === 'cancelled') return
+        j2.status = 'completed'
+        j2.result = { ok: true, kind: 'web:cookies:set', sessionId, cookies: s.cookies }
+        pushActivity('orch:job', j2)
+        return
+      }
+
+      throw new Error('unsupported_cookies_command')
+    }
+
+    if (lower.startsWith('web:consent')) {
+      const parts = g.split(' ')
+      const cmd = (parts[0] || '').trim().toLowerCase()
+      const sessionId = (parts[1] || '').trim()
+      if (!sessionId) throw new Error('missing_session_id')
+      const s = getSessionOrThrow(sessionId)
+
+      if (cmd === 'web:consent:detect') {
+        const url = await s.page.url()
+        const selectors = await isLikelyConsentDialog(url, s.page)
+        let promptId: string | undefined
+        if (selectors.length > 0) {
+          const p = addConsentPrompt(sessionId, url, selectors)
+          promptId = p.id
+        }
+        const j2 = state.jobs.get(id)
+        if (!j2) return
+        if (j2.status === 'cancelled') return
+        j2.status = 'completed'
+        j2.result = { ok: true, kind: 'web:consent:detect', sessionId, url, selectors, promptId }
+        pushActivity('orch:job', j2)
+        return
+      }
+
+      if (cmd === 'web:consent:handle') {
+        const promptId = (parts[2] || '').trim()
+        const methodRaw = (parts[3] || 'accept').trim().toLowerCase()
+        const method = ['accept', 'reject', 'dismiss'].includes(methodRaw) ? methodRaw as 'accept' | 'reject' | 'dismiss' : 'accept'
+        if (!promptId) throw new Error('missing_prompt_id')
+        const prompt = consentState.prompts.get(promptId)
+        if (!prompt || prompt.sessionId !== sessionId || prompt.handled) throw new Error('prompt_not_found')
+        const handled = await handleConsentDialog(s.page, method)
+        if (!handled) throw new Error('consent_dialog_not_found')
+        markConsentHandled(promptId, method)
+        const j2 = state.jobs.get(id)
+        if (!j2) return
+        if (j2.status === 'cancelled') return
+        j2.status = 'completed'
+        j2.result = { ok: true, kind: 'web:consent:handle', sessionId, promptId, method }
+        pushActivity('orch:job', j2)
+        return
+      }
+
+      throw new Error('unsupported_consent_command')
     }
 
     if (lower.startsWith('desktop:')) {
