@@ -229,28 +229,13 @@
     </section>
 
     <script>
-        let mobileNet, cocoSSD, bodyPix;
-        let uamStream = null;
-        let isJASONActive = false;
-        let ocrWorker = null;
-        let uiElements = [];
+        const BACKEND_URL = 'https://jason-backend.onrender.com'; // Change if you deploy elsewhere
+        let eventSource = null;
+        let currentJob = null;
+        let pendingL3Prompts = [];
 
-        async function activateJASON() {
-            if (isJASONActive) return;
-            
-            document.getElementById('ai-status').textContent = 'ACTIVATING JASON OS...';
-            
-            try {
-                await tf.ready();
-                await loadAllModels();
-                ocrWorker = await Tesseract.createWorker('eng');
-                
-                isJASONActive = true;
-                document.getElementById('ai-status').textContent = '🚀 JASON OS ONLINE - SOVEREIGN MODE';
-                
-            } catch (error) {
-                console.error('JASON OS activation failed:', error);
-            }
+        function rid(prefix = 'id') {
+            return `${prefix}_${Math.random().toString(36).substr(2, 9)}`;
         }
 
         async function loadAllModels() {
@@ -380,7 +365,7 @@
                 <div class="text-sm text-slate-400">Calling backend /api/commerce/scrape ...</div>` + output.innerHTML;
 
             try {
-                const r = await fetch('/api/commerce/scrape', {
+                const r = await fetch(`${BACKEND_URL}/api/commerce/scrape`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: site, query })
@@ -433,7 +418,7 @@
         }
 
         async function apiJson(path, opts) {
-            const r = await fetch(path, opts);
+            const r = await fetch(`${BACKEND_URL}${path}`, opts);
             const data = await r.json().catch(() => ({}));
             if (!r.ok || (data && data.ok === false)) {
                 const msg = (data && data.error) ? data.error : ('HTTP ' + r.status);
@@ -626,7 +611,7 @@
 
         function connectSSE() {
             try {
-                const es = new EventSource('/api/events');
+                const es = new EventSource(`${BACKEND_URL}/api/events`);
                 es.addEventListener('system', (ev) => appendLog('system', JSON.parse(ev.data || '{}')));
                 es.addEventListener('ping', (ev) => appendLog('ping', JSON.parse(ev.data || '{}')));
                 const types = ['trust:prompt', 'trust:decision', 'orch:job', 'web:session', 'web:session_closed', 'web:browser', 'desktop:command'];

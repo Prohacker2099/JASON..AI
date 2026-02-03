@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: jason-backend
+    env: node
+    plan: free
+    buildCommand: npm install && npx playwright install chromium
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: ALLOWED_HOSTS
+        value: localhost,127.0.0.1,Prohacker2099.github.io
+      - key: WEB_ALLOWED_HOSTS
+        value: localhost,127.0.0.1,Prohacker2099.github.io
+      - key: DESKTOP_AGENT_TOKEN
+        generateValue: true
+      - key: DESKTOP_AGENT_URL
+        value: http://127.0.0.1:5137
