@@ -39,6 +39,9 @@
                     <a href="#vlm" class="text-slate-300 hover:text-white">VLM</a>
                     <a href="#commerce" class="text-slate-300 hover:text-white">Commerce</a>
                     <a href="#education" class="text-slate-300 hover:text-white">Education</a>
+                    <a href="#trust" class="text-slate-300 hover:text-white">Trust</a>
+                    <a href="#web" class="text-slate-300 hover:text-white">Web</a>
+                    <a href="#desktop" class="text-slate-300 hover:text-white">Desktop</a>
                 </div>
             </div>
         </div>
@@ -65,6 +68,102 @@
                 <button onclick="startMarketKiller()" class="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg font-semibold">
                     💥 START MARKET KILLER
                 </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="trust" class="relative z-10 max-w-7xl mx-auto px-4 py-16">
+        <div class="glass-morphism rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-8">🛡️ Trust Gate (Real Approvals)</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-yellow-400">Kill Switch</h3>
+                    <div class="glass-morphism rounded-lg p-4">
+                        <div class="text-sm text-slate-300 mb-3">When paused, high-impact actions won't run until you unpause.</div>
+                        <div class="flex gap-2">
+                            <button onclick="setKillSwitch(true)" class="px-4 py-2 bg-red-600 rounded-lg">Pause</button>
+                            <button onclick="setKillSwitch(false)" class="px-4 py-2 bg-green-600 rounded-lg">Unpause</button>
+                            <button onclick="refreshTrust()" class="px-4 py-2 bg-slate-700 rounded-lg">Refresh</button>
+                        </div>
+                        <div class="mt-3 text-sm">Status: <span id="trust-status" class="text-slate-300">unknown</span></div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-orange-400">Pending Prompts</h3>
+                    <div id="trust-prompts" class="glass-morphism rounded-lg p-4 h-64 overflow-y-auto">
+                        <div class="text-slate-400 text-sm">No prompts yet.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="web" class="relative z-10 max-w-7xl mx-auto px-4 py-16">
+        <div class="glass-morphism rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-8">🌐 Web Automation (Playwright)</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-blue-400">Sessions</h3>
+                    <div class="glass-morphism rounded-lg p-4">
+                        <div class="flex gap-2">
+                            <button onclick="createWebSessionUI()" class="px-4 py-2 bg-blue-600 rounded-lg">Create Session</button>
+                            <button onclick="refreshWebSessions()" class="px-4 py-2 bg-slate-700 rounded-lg">Refresh</button>
+                            <button onclick="closeSelectedWebSession()" class="px-4 py-2 bg-red-700 rounded-lg">Close</button>
+                        </div>
+                        <div class="mt-3">
+                            <select id="web-session-select" class="w-full mt-1 px-3 py-2 bg-slate-800 rounded-lg border border-slate-600"></select>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold mt-8 mb-4 text-green-400">Commands</h3>
+                    <div class="glass-morphism rounded-lg p-4">
+                        <input type="text" id="web-url" placeholder="https://example.com" class="w-full mt-1 px-3 py-2 bg-slate-800 rounded-lg border border-slate-600">
+                        <div class="flex gap-2 mt-3">
+                            <button onclick="webNavigate()" class="px-4 py-2 bg-green-600 rounded-lg">Navigate</button>
+                            <button onclick="webScreenshot()" class="px-4 py-2 bg-purple-600 rounded-lg">Screenshot</button>
+                        </div>
+                        <div class="mt-3 text-xs text-slate-400">Navigation is host-allowlisted via `WEB_ALLOWED_HOSTS` on the backend.</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-purple-400">Live Screenshot</h3>
+                    <div class="glass-morphism rounded-lg p-4">
+                        <img id="web-screenshot" class="w-full rounded-lg bg-slate-900" alt="web screenshot" />
+                        <div id="web-screenshot-meta" class="text-xs text-slate-400 mt-2"></div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold mt-8 mb-4 text-slate-200">Live Logs (SSE)</h3>
+                    <div id="live-logs" class="glass-morphism rounded-lg p-4 h-64 overflow-y-auto">
+                        <div class="text-slate-400 text-sm">Connecting...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="desktop" class="relative z-10 max-w-7xl mx-auto px-4 py-16">
+        <div class="glass-morphism rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-8">🖥️ Desktop Control (Local Agent)</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-blue-400">Agent Status</h3>
+                    <div class="glass-morphism rounded-lg p-4">
+                        <div class="flex gap-2">
+                            <button onclick="desktopHealth()" class="px-4 py-2 bg-blue-600 rounded-lg">Agent Health</button>
+                            <button onclick="desktopScreenshot()" class="px-4 py-2 bg-purple-600 rounded-lg">Desktop Screenshot</button>
+                        </div>
+                        <div id="desktop-status" class="text-sm text-slate-300 mt-3">Not checked yet.</div>
+                        <div class="text-xs text-slate-400 mt-2">Requires backend env `DESKTOP_AGENT_TOKEN` and agent env `DESKTOP_AGENT_TOKEN` to match.</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-purple-400">Desktop Screenshot</h3>
+                    <div class="glass-morphism rounded-lg p-4">
+                        <img id="desktop-screenshot" class="w-full rounded-lg bg-slate-900" alt="desktop screenshot" />
+                        <div id="desktop-screenshot-meta" class="text-xs text-slate-400 mt-2"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -255,7 +354,7 @@
             const element = uiElements[0];
             const output = document.getElementById('uam-output');
             const timestamp = new Date().toLocaleTimeString();
-            const html = `<div class="mb-4 text-green-400"><strong>Action Executed [${timestamp}]</strong>: ${element.action} on ${element.type}</div>`;
+            const html = `<div class="mb-4 text-yellow-300"><strong>Action Not Executed [${timestamp}]</strong>: UAM analysis has no real desktop mapping here. Use Desktop Control for real actions.</div>`;
             output.innerHTML = html + output.innerHTML;
         }
 
@@ -322,6 +421,235 @@
                 output.innerHTML = `<div class="mb-4 text-red-400"><strong>Fetch error</strong>: ${String(e)}</div>` + output.innerHTML;
             }
         }
+
+        function appendLog(type, payload) {
+            const el = document.getElementById('live-logs');
+            const ts = new Date().toLocaleTimeString();
+            const pre = document.createElement('div');
+            pre.className = 'text-xs text-slate-300 mb-2';
+            const safe = JSON.stringify(payload ?? {}, null, 0);
+            pre.textContent = `[${ts}] ${type}: ${safe}`;
+            el.prepend(pre);
+        }
+
+        async function apiJson(path, opts) {
+            const r = await fetch(path, opts);
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok || (data && data.ok === false)) {
+                const msg = (data && data.error) ? data.error : ('HTTP ' + r.status);
+                throw new Error(String(msg));
+            }
+            return data;
+        }
+
+        async function waitForJob(jobId, timeoutMs = 30000) {
+            const start = Date.now();
+            while (Date.now() - start < timeoutMs) {
+                const r = await apiJson(`/api/orchestrator/jobs/${encodeURIComponent(jobId)}`);
+                const job = r && r.job ? r.job : null;
+                if (job && (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled')) return job;
+                await new Promise((resolve) => setTimeout(resolve, 750));
+            }
+            throw new Error('job_timeout');
+        }
+
+        function getSelectedWebSessionId() {
+            const sel = document.getElementById('web-session-select');
+            return (sel && sel.value) ? String(sel.value) : '';
+        }
+
+        async function refreshWebSessions() {
+            try {
+                const list = await apiJson('/api/web/sessions');
+                const sel = document.getElementById('web-session-select');
+                sel.innerHTML = '';
+                for (const s of list || []) {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = `${s.id} (last: ${new Date(s.lastUsedAt).toLocaleTimeString()})`;
+                    sel.appendChild(opt);
+                }
+                if (!sel.value && sel.options.length > 0) sel.value = sel.options[0].value;
+            } catch (e) {
+                appendLog('ui:error', { where: 'refreshWebSessions', error: String(e) });
+            }
+        }
+
+        async function createWebSessionUI() {
+            try {
+                const r = await apiJson('/api/web/session/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+                appendLog('web:session_create', r);
+                await refreshWebSessions();
+                const sel = document.getElementById('web-session-select');
+                if (r && r.sessionId) sel.value = r.sessionId;
+            } catch (e) {
+                appendLog('ui:error', { where: 'createWebSession', error: String(e) });
+            }
+        }
+
+        async function closeSelectedWebSession() {
+            try {
+                const id = getSelectedWebSessionId();
+                if (!id) return;
+                await apiJson('/api/web/session/close', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+                appendLog('web:session_close', { id });
+                await refreshWebSessions();
+            } catch (e) {
+                appendLog('ui:error', { where: 'closeWebSession', error: String(e) });
+            }
+        }
+
+        async function webNavigate() {
+            const sessionId = getSelectedWebSessionId();
+            const url = String(document.getElementById('web-url').value || '').trim();
+            if (!sessionId || !url) return;
+            try {
+                const r = await apiJson('/api/orch/enqueue', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ goal: `web:navigate ${sessionId} ${url}` }) });
+                appendLog('orch:enqueue', r);
+                const job = await waitForJob(r.jobId);
+                appendLog('orch:job_done', job);
+            } catch (e) {
+                appendLog('ui:error', { where: 'webNavigate', error: String(e) });
+            }
+        }
+
+        async function webScreenshot() {
+            const sessionId = getSelectedWebSessionId();
+            if (!sessionId) return;
+            try {
+                const r = await apiJson('/api/orch/enqueue', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ goal: `web:screenshot ${sessionId}` }) });
+                appendLog('orch:enqueue', r);
+                const job = await waitForJob(r.jobId);
+                appendLog('orch:job_done', job);
+                if (job && job.result && job.result.ok && job.result.base64) {
+                    const img = document.getElementById('web-screenshot');
+                    img.src = `data:${job.result.mime || 'image/jpeg'};base64,${job.result.base64}`;
+                    document.getElementById('web-screenshot-meta').textContent = `url=${job.result.url || ''}`;
+                }
+            } catch (e) {
+                appendLog('ui:error', { where: 'webScreenshot', error: String(e) });
+            }
+        }
+
+        async function refreshTrust() {
+            try {
+                const r = await apiJson('/api/trust/pending');
+                document.getElementById('trust-status').textContent = r.paused ? 'paused' : 'active';
+                const wrap = document.getElementById('trust-prompts');
+                const prompts = Array.isArray(r.prompts) ? r.prompts : [];
+                wrap.innerHTML = '';
+                if (prompts.length === 0) {
+                    wrap.innerHTML = '<div class="text-slate-400 text-sm">No prompts.</div>';
+                    return;
+                }
+                for (const p of prompts) {
+                    const div = document.createElement('div');
+                    div.className = 'mb-4 p-3 rounded-lg bg-slate-900/50 border border-slate-700';
+                    const title = document.createElement('div');
+                    title.className = 'text-sm font-semibold';
+                    title.textContent = `${p.title} (L${p.level})`;
+                    const rat = document.createElement('div');
+                    rat.className = 'text-xs text-slate-300 mt-1';
+                    rat.textContent = p.rationale || '';
+                    const btns = document.createElement('div');
+                    btns.className = 'flex gap-2 mt-3';
+                    const approve = document.createElement('button');
+                    approve.className = 'px-3 py-1 bg-green-600 rounded';
+                    approve.textContent = 'Approve';
+                    approve.onclick = () => decidePrompt(p.id, 'approve');
+                    const reject = document.createElement('button');
+                    reject.className = 'px-3 py-1 bg-red-600 rounded';
+                    reject.textContent = 'Reject';
+                    reject.onclick = () => decidePrompt(p.id, 'reject');
+                    const delay = document.createElement('button');
+                    delay.className = 'px-3 py-1 bg-slate-700 rounded';
+                    delay.textContent = 'Delay';
+                    delay.onclick = () => decidePrompt(p.id, 'delay');
+                    btns.appendChild(approve);
+                    btns.appendChild(reject);
+                    btns.appendChild(delay);
+                    div.appendChild(title);
+                    div.appendChild(rat);
+                    div.appendChild(btns);
+                    wrap.appendChild(div);
+                }
+            } catch (e) {
+                appendLog('ui:error', { where: 'refreshTrust', error: String(e) });
+            }
+        }
+
+        async function setKillSwitch(paused) {
+            try {
+                await apiJson('/api/trust/kill', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paused }) });
+                await refreshTrust();
+            } catch (e) {
+                appendLog('ui:error', { where: 'setKillSwitch', error: String(e) });
+            }
+        }
+
+        async function decidePrompt(id, decision) {
+            try {
+                await apiJson('/api/trust/decide', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, decision }) });
+                await refreshTrust();
+            } catch (e) {
+                appendLog('ui:error', { where: 'decidePrompt', error: String(e) });
+            }
+        }
+
+        async function desktopHealth() {
+            try {
+                const r = await apiJson('/api/desktop/health');
+                document.getElementById('desktop-status').textContent = JSON.stringify(r.agent);
+                appendLog('desktop:health', r);
+            } catch (e) {
+                document.getElementById('desktop-status').textContent = String(e);
+                appendLog('ui:error', { where: 'desktopHealth', error: String(e) });
+            }
+        }
+
+        async function desktopScreenshot() {
+            try {
+                const r = await apiJson('/api/desktop/execute', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'screenshot', format: 'jpeg', quality: 70 }) });
+                appendLog('desktop:screenshot_job', r);
+                const job = await waitForJob(r.jobId);
+                appendLog('orch:job_done', job);
+                const agent = job && job.result && job.result.agent ? job.result.agent : null;
+                if (agent && agent.ok && agent.base64) {
+                    const img = document.getElementById('desktop-screenshot');
+                    img.src = `data:${agent.mime || 'image/jpeg'};base64,${agent.base64}`;
+                    document.getElementById('desktop-screenshot-meta').textContent = `${agent.mime || ''}`;
+                }
+            } catch (e) {
+                appendLog('ui:error', { where: 'desktopScreenshot', error: String(e) });
+            }
+        }
+
+        function connectSSE() {
+            try {
+                const es = new EventSource('/api/events');
+                es.addEventListener('system', (ev) => appendLog('system', JSON.parse(ev.data || '{}')));
+                es.addEventListener('ping', (ev) => appendLog('ping', JSON.parse(ev.data || '{}')));
+                const types = ['trust:prompt', 'trust:decision', 'orch:job', 'web:session', 'web:session_closed', 'web:browser', 'desktop:command'];
+                for (const t of types) {
+                    es.addEventListener(t, (ev) => {
+                        let payload = {};
+                        try { payload = JSON.parse(ev.data || '{}'); } catch { payload = { raw: ev.data }; }
+                        appendLog(t, payload);
+                        if (t === 'trust:prompt' || t === 'trust:decision') refreshTrust();
+                        if (t === 'web:session' || t === 'web:session_closed') refreshWebSessions();
+                    });
+                }
+                es.onerror = () => appendLog('sse:error', { message: 'disconnected' });
+            } catch (e) {
+                appendLog('sse:error', { error: String(e) });
+            }
+        }
+
+        window.addEventListener('load', () => {
+            connectSSE();
+            refreshTrust();
+            refreshWebSessions();
+        });
     </script>
 </body>
 </html>

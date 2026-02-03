@@ -28,7 +28,8 @@
   },
   "homepage": "https://Prohacker2099.github.io/JASON..AI",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "playwright": "^1.41.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
